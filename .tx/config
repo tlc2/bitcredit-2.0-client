@@ -1,0 +1,7 @@
+[main]
+host = https://www.transifex.com
+
+[bitcredit.qt-translation-012x]
+file_filter = src/qt/locale/bitcredit_<lang>.ts
+source_file = src/qt/locale/bitcredit_en.ts
+source_lang = en

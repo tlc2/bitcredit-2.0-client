@@ -1,0 +1,81 @@
+policy_module(bitcredit, 1.100.1)
+
+########################################
+#
+# Declarations
+#
+
+type bitcredit_t;
+type bitcredit_exec_t;
+init_daemon_domain(bitcredit_t, bitcredit_exec_t)
+
+permissive bitcredit_t;
+
+type bitcredit_initrc_exec_t;
+init_script_file(bitcredit_initrc_exec_t)
+
+type bitcredit_conf_t;
+files_type(bitcredit_conf_t)
+
+type bitcredit_var_lib_t;
+files_type(bitcredit_var_lib_t)
+
+type bitcredit_var_run_t;
+files_type(bitcredit_var_run_t)
+
+type bitcredit_port_t;
+corenet_port(bitcredit_port_t)
+
+########################################
+#
+# bitcredit local policy
+#
+allow bitcredit_t self:process { fork };
+
+allow bitcredit_t self:fifo_file rw_fifo_file_perms;
+allow bitcredit_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(bitcredit_t, bitcredit_conf_t, bitcredit_conf_t)
+manage_files_pattern(bitcredit_t, bitcredit_conf_t, bitcredit_conf_t)
+
+manage_dirs_pattern(bitcredit_t, bitcredit_var_lib_t, bitcredit_var_lib_t)
+manage_files_pattern(bitcredit_t, bitcredit_var_lib_t, bitcredit_var_lib_t)
+files_var_lib_filetrans(bitcredit_t, bitcredit_var_lib_t, { dir file })
+
+manage_dirs_pattern(bitcredit_t, bitcredit_var_run_t, bitcredit_var_run_t)
+manage_files_pattern(bitcredit_t, bitcredit_var_run_t, bitcredit_var_run_t)
+
+sysnet_dns_name_resolve(bitcredit_t)
+corenet_all_recvfrom_unlabeled(bitcredit_t)
+
+allow bitcredit_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(bitcredit_t)
+corenet_tcp_sendrecv_generic_node(bitcredit_t)
+corenet_tcp_sendrecv_all_ports(bitcredit_t)
+corenet_tcp_bind_generic_node(bitcredit_t)
+
+gen_require(`
+    type bitcredit_port_t;
+')
+allow bitcredit_t bitcredit_port_t:tcp_socket name_bind;
+
+gen_require(`
+    type bitcredit_port_t;
+')
+allow bitcredit_t bitcredit_port_t:tcp_socket name_connect;
+
+domain_use_interactive_fds(bitcredit_t)
+
+files_read_etc_files(bitcredit_t)
+
+miscfiles_read_localization(bitcredit_t)
+
+sysnet_dns_name_resolve(bitcredit_t)
+
+allow bitcredit_t bitcredit_exec_t:file execute_no_trans;
+allow bitcredit_t self:process setsched;
+corecmd_exec_ls(bitcredit_t)
+corenet_tcp_connect_http_port(bitcredit_t)
+dev_read_urand(bitcredit_t)
+fs_getattr_xattr_fs(bitcredit_t)
+kernel_read_system_state(bitcredit_t)
