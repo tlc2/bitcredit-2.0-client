@@ -35,7 +35,7 @@
 #define DEST_IP "84.200.32.78"
 
 /** Loan manager */
-void CLoanServer::getcreditratings()
+void CLoanManager::getcreditratings()
 {
     std::string url = "";
 
