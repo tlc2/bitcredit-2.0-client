@@ -9,6 +9,9 @@
 #include "tinyformat.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "pow.h"
+#include "arith_uint256.h"
+
 
 #include <assert.h>
 
@@ -55,6 +58,35 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
+void  CChainParams::MineNewGenesisBlock()
+{
+    fPrintToConsole = true;
+    LogPrintStr("Searching for genesis block...\n");
+   
+    arith_uint256 hashTarget = UintToArith256(consensus.powLimit);
+    
+    while(true) {
+        arith_uint256 thash = UintToArith256(genesis.GetHash());
+        if (thash <= hashTarget)
+            break;
+        if ((genesis.nNonce & 0xFFF) == 0) 
+            LogPrintf("nonce %08X: hash = %s (target = %s)\n", genesis.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+   
+        ++genesis.nNonce;
+        if (genesis.nNonce == 0) {
+            LogPrintf("NONCE WRAPPED, incrementing time\n");
+            ++genesis.nTime;
+        }
+    }
+    LogPrintf("genesis.nTime = %u \n",  genesis.nTime);
+    LogPrintf("genesis.nNonce = %u \n",  genesis.nNonce);
+    LogPrintf("genesis.GetPoWHash = %s\n",  genesis.GetHash().ToString().c_str());
+    LogPrintf("genesis.GetHash = %s\n",  genesis.GetHash().ToString().c_str());
+    LogPrintf("genesis.hashMerkleRoot = %s\n",  genesis.hashMerkleRoot.ToString().c_str());
+
+    exit(1);
+}
+
 /**
  * Main network
  */
@@ -70,19 +102,19 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nSubsidyHalvingInterval = 210000;
+        consensus.nSubsidyHalvingInterval = 40320;
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 60 * 60; // 60 minutes
-        consensus.nPowTargetSpacing = 2 * 60;
+        consensus.nPowTargetTimespan = 12 * 60; // 12 minutes
+        consensus.nPowTargetSpacing = 3 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1916; // 95% of 2016
-        consensus.nMinerConfirmationWindow = 30; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 4; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -106,6 +138,7 @@ public:
 
         genesis = CreateGenesisBlock(1459076565, 202, 0x2000ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
+        //MineNewGenesisBlock();
         assert(consensus.hashGenesisBlock == uint256S("0x00f81b193ce2782a5662fa26a7ed1456bfaf59f49b79471c0264b0b11db5fc99"));
         assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
 
@@ -127,7 +160,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (0, uint256S("0x00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983")),
+            (0, uint256S("0x0000000069e244f73d78e8fd29ba2fd2ed618bd6fa2ee92559f542fdb26e7c1d")),
             1459076565, // * UNIX timestamp of last checkpoint block
             1,   // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
@@ -144,7 +177,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nSubsidyHalvingInterval = 210000;
+        consensus.nSubsidyHalvingInterval = 40320;
         consensus.nMajorityEnforceBlockUpgrade = 51;
         consensus.nMajorityRejectBlockOutdated = 75;
         consensus.nMajorityWindow = 100;
@@ -173,9 +206,10 @@ public:
         nDefaultPort = 12017;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1459076565, 202, 0x2000ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1462499277, 41, 0x2000ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00f81b193ce2782a5662fa26a7ed1456bfaf59f49b79471c0264b0b11db5fc99"));
+		//MineNewGenesisBlock();
+        assert(consensus.hashGenesisBlock == uint256S("0x0057d5b212cb690f0982640161e70cf49b46f776e646bfb06007adf3a737db89"));
         assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
 
         vFixedSeeds.clear();
@@ -242,9 +276,11 @@ public:
         nDefaultPort = 12018;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1459076565, 202, 0x2000ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1462499277, 41, 0x2000ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00f81b193ce2782a5662fa26a7ed1456bfaf59f49b79471c0264b0b11db5fc99"));
+		//MineNewGenesisBlock();
+        //throw std::runtime_error(strprintf("genesis hash %s", genesis.GetHash().ToString().c_str()));
+        assert(consensus.hashGenesisBlock == uint256S("0x0057d5b212cb690f0982640161e70cf49b46f776e646bfb06007adf3a737db89"));
         assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.

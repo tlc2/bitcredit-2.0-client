@@ -384,7 +384,7 @@ void BitcreditGUI::createActions()
     quitAction->setStatusTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), toolbar2);
+    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), this);
     aboutAction->setStatusTip(tr("Show information about %1").arg(tr(PACKAGE_NAME)));
     //aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(platformStyle->TextColorIcon(":/icons/about_qt"), tr("About &Qt"), this);
@@ -1388,52 +1388,3 @@ void BitcreditGUI::mouseMoveEvent(QMouseEvent *event)
     move(event->globalX() - m_nMouseClick_X_Coordinate, event->globalY() - m_nMouseClick_Y_Coordinate);
 }
 
-/** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */
-void UnitDisplayStatusBarControl::createContextMenu()
-{
-    menu = new QMenu();
-    Q_FOREACH(BitcreditUnits::Unit u, BitcreditUnits::availableUnits())
-    {
-        QAction *menuAction = new QAction(QString(BitcreditUnits::name(u)), this);
-        menuAction->setData(QVariant(u));
-        menu->addAction(menuAction);
-    }
-    connect(menu,SIGNAL(triggered(QAction*)),this,SLOT(onMenuSelection(QAction*)));
-}
-
-/** Lets the control know about the Options Model (and its signals) */
-void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel *optionsModel)
-{
-    if (optionsModel)
-    {
-        this->optionsModel = optionsModel;
-
-        // be aware of a display unit change reported by the OptionsModel object.
-        connect(optionsModel,SIGNAL(displayUnitChanged(int)),this,SLOT(updateDisplayUnit(int)));
-
-        // initialize the display units label with the current value in the model.
-        updateDisplayUnit(optionsModel->getDisplayUnit());
-    }
-}
-
-/** When Display Units are changed on OptionsModel it will refresh the display text of the control on the status bar */
-void UnitDisplayStatusBarControl::updateDisplayUnit(int newUnits)
-{
-    setText(BitcreditUnits::name(newUnits));
-}
-
-/** Shows context menu with Display Unit options by the mouse coordinates */
-void UnitDisplayStatusBarControl::onDisplayUnitsClicked(const QPoint& point)
-{
-    QPoint globalPos = mapToGlobal(point);
-    menu->exec(globalPos);
-}
-
-/** Tells underlying optionsModel to update its current display unit. */
-void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
-{
-    if (action)
-    {
-        optionsModel->setDisplayUnit(action->data());
-    }
-}

@@ -50,6 +50,7 @@
         <file alias="fontbigger">res/icons/fontbigger-w.png</file>
         <file alias="fontsmaller">res/icons/fontsmaller-w.png</file>
         <file alias="prompticon">res/icons/chevron-w.png</file>
+        <file alias="transaction_abandoned">res/icons/transaction_abandoned.png</file>
     </qresource>
     <qresource prefix="/css">
         <file alias="dyno">res/css/dyno.css</file>

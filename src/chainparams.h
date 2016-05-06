@@ -92,6 +92,8 @@ protected:
     bool fMineBlocksOnDemand;
     bool fTestnetToBeDeprecatedFieldRPC;
     CCheckpointData checkpointData;
+
+    void MineNewGenesisBlock();
 };
 
 /**
