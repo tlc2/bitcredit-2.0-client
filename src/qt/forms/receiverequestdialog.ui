@@ -71,8 +71,14 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="btnCopyURI">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Copy &amp;URI</string>
+        <string>  Copy &amp;URI  </string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -81,8 +87,14 @@
      </item>
      <item>
       <widget class="QPushButton" name="btnCopyAddress">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Copy &amp;Address</string>
+        <string>  Copy &amp;Address  </string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -91,8 +103,14 @@
      </item>
      <item>
       <widget class="QPushButton" name="btnSaveAs">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="text">
-        <string>&amp;Save Image...</string>
+        <string>  &amp;Save Image...</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -114,6 +132,12 @@
      </item>
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="standardButtons">
         <set>QDialogButtonBox::Close</set>
        </property>

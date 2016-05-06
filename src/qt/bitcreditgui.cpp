@@ -17,6 +17,7 @@
 #include "openuridialog.h"
 #include "optionsdialog.h"
 #include "optionsmodel.h"
+#include "overviewpage.h"
 #include "platformstyle.h"
 #include "rpcconsole.h"
 #include "utilitydialog.h"
@@ -41,6 +42,7 @@
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
+#include <QFile>
 #include <QListWidget>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -50,7 +52,7 @@
 #include <QSettings>
 #include <QShortcut>
 #include <QStackedWidget>
-#include <QStatusBar>
+//#include <QStatusBar>
 #include <QStyle>
 #include <QTimer>
 #include <QToolBar>
@@ -70,8 +72,8 @@ const std::string BitcreditGUI::DEFAULT_UIPLATFORM =
         "windows"
 #else
         "other"
-#endif
-        ;
+#endif 
+;
 
 const QString BitcreditGUI::DEFAULT_WALLET = "~Default";
 
@@ -79,7 +81,7 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     QMainWindow(parent),
     clientModel(0),
     walletFrame(0),
-    unitDisplayControl(0),
+    //unitDisplayControl(0),
     labelEncryptionIcon(0),
     labelConnectionsIcon(0),
     labelBlocksIcon(0),
@@ -117,7 +119,15 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     spinnerFrame(0),
     platformStyle(platformStyle)
 {
-    GUIUtil::restoreWindowGeometry("nWindow", QSize(850, 550), this);
+    setFixedSize(850, 650);
+    setWindowFlags(Qt::FramelessWindowHint);
+    GUIUtil::restoreWindowGeometry("nWindow", QSize(850, 650), this);
+
+    // load stylesheet
+    QFile qss(":css/dyno");
+    qss.open(QFile::ReadOnly);
+    qApp->setStyleSheet(qss.readAll());
+    qss.close();
 
     QString windowTitle = tr(PACKAGE_NAME) + " - ";
 #ifdef ENABLE_WALLET
@@ -132,7 +142,7 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     } else {
         windowTitle += tr("Node");
     }
-    windowTitle += " " + networkStyle->getTitleAddText();
+    //windowTitle += " " + networkStyle->getTitleAddText();
 #ifndef Q_OS_MAC
     QApplication::setWindowIcon(networkStyle->getTrayAndWindowIcon());
     setWindowIcon(networkStyle->getTrayAndWindowIcon());
@@ -152,9 +162,13 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
 #ifdef ENABLE_WALLET
     if(enableWallet)
     {
-        /** Create wallet frame and make it the central widget */
+        /** Create wallet frame and make it the centralish widget */
         walletFrame = new WalletFrame(platformStyle, this);
-        setCentralWidget(walletFrame);
+        //walletFrame = new WalletFrame(this);
+        //setCentralWidget(walletFrame);
+        walletFrame->setFixedWidth(850);
+        walletFrame->setFixedHeight(390);
+        walletFrame->move(0,165);        
     } else
 #endif // ENABLE_WALLET
     {
@@ -167,12 +181,45 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     // Accept D&D of URIs
     setAcceptDrops(true);
 
+    // Header UI elements
+
+    // logo - we'll make it a button that leads back to the overviewpage menu
+    Logo = new QPushButton(this);
+    Logo->move(20, 30);
+    Logo->setFixedWidth(250);
+    Logo->setFixedHeight(80);
+    Logo->setObjectName("Logo");
+    connect(Logo, SIGNAL(clicked()), this, SLOT(gotoOverviewPage()));
+
+    // balance frame
+    bframe = new QFrame(this);
+    bframe->move(290, 20);
+    bframe->setFixedWidth(540);
+    bframe->setFixedHeight(100);
+    bframe->setObjectName("bframe");    
+
+    // available balance label
+    labelBalance = new QLabel(bframe);
+    labelBalance->move(10, 25);
+    labelBalance->setFixedWidth(520);
+    labelBalance->setFixedHeight(20);
+    labelBalance->setText("Available Balance:");
+    labelBalance->setObjectName("labelBalance");    
+
+    // balance label  
+    labelHeaderBalance = new QLabel(bframe);
+    labelHeaderBalance->move(10, 45);
+    labelHeaderBalance->setFixedWidth(520);
+    labelHeaderBalance->setFixedHeight(30);
+    labelHeaderBalance->setText("0.00");
+    labelHeaderBalance->setObjectName("labelHeaderBalance");
+    
     // Create actions for the toolbar, menu bar and tray/dock icon
     // Needs walletFrame to be initialized
     createActions();
 
     // Create application menu bar
-    createMenuBar();
+    //createMenuBar();
 
     // Create the toolbars
     createToolBars();
@@ -180,37 +227,61 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     // Create system tray icon and notification
     createTrayIcon(networkStyle);
 
-    // Create status bar
-    statusBar();
+    // create bottom 'toolbar'...
+    QWidget *toolbar2 = new QWidget(this);
+    toolbar2->setFixedHeight(30);
+    toolbar2->setFixedWidth(830);
+    toolbar2->move(10, 620);
+    toolbar2->setObjectName("toolbar2");
+    
+    // ...add encryption, connections and blocks icons
+    labelEncryptionIcon = new QLabel(toolbar2);
+    labelEncryptionIcon->setObjectName("labelEncryptionIcon");
+    labelEncryptionIcon->setFixedHeight(20);
+    labelEncryptionIcon->setFixedWidth(20);
+    labelEncryptionIcon->move(80, 0);
+    labelConnectionsIcon = new QLabel(toolbar2);
+    labelConnectionsIcon->setPixmap(QIcon(":/icons/connect_0").pixmap(18, 18));
+    labelConnectionsIcon->setObjectName("labelConnectionsIcon");
+    labelConnectionsIcon->setFixedHeight(20);
+    labelConnectionsIcon->setFixedWidth(20);
+    labelConnectionsIcon->move(0, 0);
+    labelBlocksIcon = new QLabel(toolbar2);
+    labelBlocksIcon->setPixmap(QIcon(":/icons/connect0s").pixmap(18, 18)); //Initialize with 'searching' icon so people with slow connections see something
+    labelBlocksIcon->setToolTip("Looking for more network connections");
+    labelBlocksIcon->setObjectName("labelBlocksIcon");
+    labelBlocksIcon->setFixedHeight(20);
+    labelBlocksIcon->setFixedWidth(20);
+    labelBlocksIcon->move(40, 0);
+    
+    QPushButton *aboutButton = new QPushButton(toolbar2);
+    //aboutButton->setStyleSheet("padding: none; border: none; background-color: #232323; background-image: url(':/icons/about'); background-repeat: none; background-position: center;");
+    aboutButton->setFixedHeight(30);
+    aboutButton->setFixedWidth(30);
+    aboutButton->move(720, 0);
+    aboutButton->setToolTip("About Bitcredit");
+    aboutButton->setObjectName("aboutButton");
+    connect(aboutButton, SIGNAL(clicked()), this, SLOT(aboutClicked()));
+    
+    QPushButton *hideButton = new QPushButton(toolbar2);
+    //hideButton->setStyleSheet("padding: none; border: none; background-color: #232323; background-image: url(':/icons/hide'); background-repeat: none; background-position: center;");
+    hideButton->setFixedHeight(30);
+    hideButton->setFixedWidth(30);
+    hideButton->move(760, 0);
+    hideButton->setToolTip("Minimise");
+    hideButton->setObjectName("hideButton");
+    connect(hideButton, SIGNAL(clicked()), this, SLOT(toggleHidden()));
 
-    // Disable size grip because it looks ugly and nobody needs it
-    statusBar()->setSizeGripEnabled(false);
-
-    // Status bar notification icons
-    QFrame *frameBlocks = new QFrame();
-    frameBlocks->setContentsMargins(0,0,0,0);
-    frameBlocks->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
-    frameBlocksLayout->setContentsMargins(3,0,3,0);
-    frameBlocksLayout->setSpacing(3);
-    unitDisplayControl = new UnitDisplayStatusBarControl(platformStyle);
-    labelEncryptionIcon = new QLabel();
-    labelConnectionsIcon = new QLabel();
-    labelBlocksIcon = new QLabel();
-    if(enableWallet)
-    {
-        frameBlocksLayout->addStretch();
-        frameBlocksLayout->addWidget(unitDisplayControl);
-        frameBlocksLayout->addStretch();
-        frameBlocksLayout->addWidget(labelEncryptionIcon);
-    }
-    frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(labelConnectionsIcon);
-    frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(labelBlocksIcon);
-    frameBlocksLayout->addStretch();
-
-    // Progress bar and label for blocks download
+    QPushButton *quitButton = new QPushButton(toolbar2);
+    //quitButton->setStyleSheet("padding: none; border: none; background-color: #232323;  background-image: url(':/icons/quit'); background-repeat: none; background-position: center;");
+    quitButton->setFixedHeight(30);
+    quitButton->setFixedWidth(30);
+    quitButton->move(800, 0);
+    quitButton->setToolTip("Exit");
+    quitButton->setObjectName("quitButton");
+    connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
+    
+    // Progress bar and label for blocks download (these will float if called since we haven't added them to anything else)
     progressBarLabel = new QLabel();
     progressBarLabel->setVisible(false);
     progressBar = new GUIUtil::ProgressBar();
@@ -225,10 +296,6 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     {
         progressBar->setStyleSheet("QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
     }
-
-    statusBar()->addWidget(progressBarLabel);
-    statusBar()->addWidget(progressBar);
-    statusBar()->addPermanentWidget(frameBlocks);
 
     // Install event filter to be able to catch status tip events (QEvent::StatusTip)
     this->installEventFilter(this);
@@ -317,9 +384,9 @@ void BitcreditGUI::createActions()
     quitAction->setStatusTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), this);
+    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), toolbar2);
     aboutAction->setStatusTip(tr("Show information about %1").arg(tr(PACKAGE_NAME)));
-    aboutAction->setMenuRole(QAction::AboutRole);
+    //aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(platformStyle->TextColorIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setStatusTip(tr("Show information about Qt"));
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
@@ -370,11 +437,27 @@ void BitcreditGUI::createActions()
     if(walletFrame)
     {
         connect(encryptWalletAction, SIGNAL(triggered(bool)), walletFrame, SLOT(encryptWallet(bool)));
+
+        // cryptit signal triggerred from otherPage via walletView, jesus christ #4
+        connect(this, SIGNAL(enc(bool)), walletFrame, SLOT(encryptWallet(bool)));    
+        
         connect(backupWalletAction, SIGNAL(triggered()), walletFrame, SLOT(backupWallet()));
+
+        // backitup signal triggerred from otherPage via walletView, jesus christ
+        connect(this, SIGNAL(backitup()), walletFrame, SLOT(backupWallet()));
+
         connect(changePassphraseAction, SIGNAL(triggered()), walletFrame, SLOT(changePassphrase()));
         connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
         connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
+
         connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedSendingAddresses()));
+        
+        // usedsending signal triggerred from otherPage via walletView, jesus christ #2
+        connect(this, SIGNAL(usedsending()), walletFrame, SLOT(usedSendingAddresses()));
+        
+        // usedreceiving signal triggerred from otherPage via walletView, jesus christ #3
+        connect(this, SIGNAL(usedreceiving()), walletFrame, SLOT(usedReceivingAddresses()));
+        
         connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame, SLOT(usedReceivingAddresses()));
         connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
     }
@@ -382,6 +465,31 @@ void BitcreditGUI::createActions()
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_C), this, SLOT(showDebugWindowActivateConsole()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D), this, SLOT(showDebugWindow()));
+}
+
+void BitcreditGUI::enc()
+{
+    if(walletFrame) encryptWalletAction->activate(QAction::Trigger);
+}
+
+void BitcreditGUI::changepw()
+{
+    if(walletFrame) changePassphraseAction->activate(QAction::Trigger);
+}
+
+void BitcreditGUI::emitbackitup()
+{
+    Q_EMIT backitup();
+}
+
+void BitcreditGUI::emitusedsending()
+{
+    Q_EMIT usedsending();
+}
+
+void BitcreditGUI::emitusedreceiving()
+{
+    Q_EMIT usedreceiving();
 }
 
 void BitcreditGUI::createMenuBar()
@@ -433,15 +541,115 @@ void BitcreditGUI::createToolBars()
 {
     if(walletFrame)
     {
-        QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
-        toolbar->setMovable(false);
-        toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        toolbar->addAction(overviewAction);
-        toolbar->addAction(sendCoinsAction);
-        toolbar->addAction(receiveCoinsAction);
-        toolbar->addAction(historyAction);
-        overviewAction->setChecked(true);
-    }
+        // menu/back button
+        bover = new QPushButton(this);
+        bover->setFixedWidth(830);
+        bover->setFixedHeight(50);
+        bover->setObjectName("bover");
+        bover->move(10,565);
+        bover->setText(" <<< Menu <<<");
+        connect(bover, SIGNAL(clicked()), this, SLOT(gotoOverviewPage()));
+        bover->hide();
+        
+        // sendrec 'toolbar' with send and receive 'tabs'
+        sendrec = new QWidget(this);
+        sendrec->setFixedHeight(25);
+        sendrec->setFixedWidth(830);
+        sendrec->move(10, 135);
+        sendrec->hide();
+        
+        bsendtab = new QPushButton(sendrec);
+        bsendtab->setFixedHeight(25);
+        bsendtab->setFixedWidth(415);
+        bsendtab->move(0,0);
+        bsendtab->setText("Send");
+        bsendtab->setObjectName("bsendtab");
+        bsendtab->setCheckable(true);
+        connect(bsendtab, SIGNAL(clicked()), this, SLOT(gotoSendCoinsPage()));
+        
+        brectab = new QPushButton(sendrec);
+        brectab->setFixedHeight(25);
+        brectab->setFixedWidth(415);
+        brectab->move(415,0);
+        brectab->setText("Receive");
+        brectab->setObjectName("brectab");
+        brectab->setCheckable(true);
+        connect(brectab, SIGNAL(clicked()), this, SLOT(gotoReceiveCoinsPage()));
+
+        // p2p finance page lend / borrow toolbar
+        p2p = new QWidget(this);
+        p2p->setFixedHeight(25);
+        p2p->setFixedWidth(830);
+        p2p->move(10, 135);
+        p2p->setObjectName("uands");
+        p2p->hide();
+
+        bborrow = new QPushButton(p2p);
+        bborrow->setFixedHeight(25);
+        bborrow->setFixedWidth(415);
+        bborrow->move(0,0);
+        bborrow->setText("Borrow BCR");
+        bborrow->setObjectName("bborrow");
+        bborrow->setCheckable(true);
+        connect(bborrow, SIGNAL(clicked()), this, SLOT(gotoP2PPage()));
+        
+        blend = new QPushButton(p2p);
+        blend->setFixedHeight(25);
+        blend->setFixedWidth(415);
+        blend->move(415,0);
+        blend->setText("Lend BCR");
+        blend->setObjectName("blend");
+        blend->setCheckable(true);
+        connect(blend, SIGNAL(clicked()), this, SLOT(gotoP2PLPage()));
+
+        // utilities and settings 'toolbar'
+        uands = new QWidget(this);
+        uands->setFixedHeight(25);
+        uands->setFixedWidth(830);
+        uands->move(10, 135);
+        uands->setObjectName("uands");
+        uands->hide();
+
+        bbcrstatstab = new QPushButton(uands);
+        bbcrstatstab->setFixedHeight(25);
+        bbcrstatstab->setFixedWidth(207);
+        bbcrstatstab->move(0,0);
+        bbcrstatstab->setText("BCR Network Stats");
+        bbcrstatstab->setObjectName("bbcrstatstab");
+        bbcrstatstab->setCheckable(true);
+        bbcrstatstab->setObjectName("bbcrstatstab");
+        connect(bbcrstatstab, SIGNAL(clicked()), this, SLOT(gotoUtilitiesPage()));
+
+        bexplorertab = new QPushButton(uands);
+        bexplorertab->setFixedHeight(25);
+        bexplorertab->setFixedWidth(207);
+        bexplorertab->move(208, 0);
+        bexplorertab->setText("Block Explorer");
+        bexplorertab->setObjectName("bexplorertab");
+        bexplorertab->setCheckable(true);
+        bexplorertab->setObjectName("bexplorertab");
+        connect(bexplorertab, SIGNAL(clicked()), this, SLOT(gotoBlockExplorerPage()));
+        
+        bmarkettab = new QPushButton(uands);
+        bmarkettab->setFixedHeight(25);
+        bmarkettab->setFixedWidth(207);
+        bmarkettab->move(416, 0);
+        bmarkettab->setText("Market Data");
+        bmarkettab->setObjectName("bmarkettab");
+        bmarkettab->setCheckable(true);
+        bmarkettab->setObjectName("bmarkettab");
+        connect(bmarkettab, SIGNAL(clicked()), this, SLOT(gotoExchangeBrowserPage()));
+
+        bothertab = new QPushButton(uands);
+        bothertab->setFixedHeight(25);
+        bothertab->setFixedWidth(206);
+        bothertab->move(624, 0);
+        bothertab->setText("Other Stuff");
+        bothertab->setObjectName("bothertab");
+        bothertab->setCheckable(true);
+        bothertab->setObjectName("bothertab");
+        connect(bothertab, SIGNAL(clicked()), this, SLOT(gotoOtherPage()));
+     }
 }
 
 void BitcreditGUI::setClientModel(ClientModel *clientModel)
@@ -473,7 +681,7 @@ void BitcreditGUI::setClientModel(ClientModel *clientModel)
             walletFrame->setClientModel(clientModel);
         }
 #endif // ENABLE_WALLET
-        unitDisplayControl->setOptionsModel(clientModel->getOptionsModel());
+        //unitDisplayControl->setOptionsModel(clientModel->getOptionsModel());
     } else {
         // Disable possibility to show main window via action
         toggleHideAction->setEnabled(false);
@@ -638,26 +846,120 @@ void BitcreditGUI::openClicked()
 
 void BitcreditGUI::gotoOverviewPage()
 {
-    overviewAction->setChecked(true);
+    Logo->setStyleSheet("background-image: url(':css/logo');");
     if (walletFrame) walletFrame->gotoOverviewPage();
+    bover->hide();
+    sendrec->hide();
+    uands->hide();
+    p2p->hide();
 }
 
 void BitcreditGUI::gotoHistoryPage()
 {
-    historyAction->setChecked(true);
+    Logo->setStyleSheet("background-image: url(':css/logo-history');");
     if (walletFrame) walletFrame->gotoHistoryPage();
+    bover->show();
 }
 
 void BitcreditGUI::gotoReceiveCoinsPage()
 {
-    receiveCoinsAction->setChecked(true);
+    Logo->setStyleSheet("background-image: url(':css/logo-receive');");
     if (walletFrame) walletFrame->gotoReceiveCoinsPage();
+    bover->show();
+    brectab->setChecked(true);
+    bsendtab->setChecked(false);
 }
 
 void BitcreditGUI::gotoSendCoinsPage(QString addr)
 {
-    sendCoinsAction->setChecked(true);
+    Logo->setStyleSheet("background-image: url(':css/logo-send');");
     if (walletFrame) walletFrame->gotoSendCoinsPage(addr);
+    bover->show();
+    sendrec->show();
+    brectab->setChecked(false);
+    bsendtab->setChecked(true);
+}
+
+void BitcreditGUI::gotoBidPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-bid');");
+    if (walletFrame) walletFrame->gotoBidPage();
+    bover->show();
+}
+
+void BitcreditGUI::gotoP2PPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    if (walletFrame) walletFrame->gotoP2PPage();
+    p2p->show();
+    bover->show();
+    bborrow->setChecked(true);
+    blend->setChecked(false);
+}
+
+void BitcreditGUI::gotoP2PLPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    if (walletFrame) walletFrame->gotoP2PLPage();
+    p2p->show();
+    bover->show();
+    bborrow->setChecked(false);
+    blend->setChecked(true);
+}
+
+void BitcreditGUI::gotoAssetsPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-assets');");
+    if (walletFrame) walletFrame->gotoAssetsPage();
+    bover->show();
+}
+
+void BitcreditGUI::gotoUtilitiesPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-finstats');");
+    if (walletFrame) walletFrame->gotoUtilitiesPage();
+    bover->show();
+    uands->show();
+    bbcrstatstab->setChecked(true);
+    bexplorertab->setChecked(false);
+    bmarkettab->setChecked(false);
+    bothertab->setChecked(false);
+}
+
+void BitcreditGUI::gotoBlockExplorerPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-explorer');");
+    if (walletFrame) walletFrame->gotoBlockExplorerPage();
+    bover->show();
+    uands->show();
+    bbcrstatstab->setChecked(false);
+    bexplorertab->setChecked(true);
+    bmarkettab->setChecked(false);
+    bothertab->setChecked(false);
+}
+
+void BitcreditGUI::gotoExchangeBrowserPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-market');");
+    if (walletFrame) walletFrame->gotoExchangeBrowserPage();
+    bover->show();
+    uands->show();
+    bbcrstatstab->setChecked(false);
+    bexplorertab->setChecked(false);
+    bmarkettab->setChecked(true);
+    bothertab->setChecked(false);
+}
+
+void BitcreditGUI::gotoOtherPage()
+{
+    Logo->setStyleSheet("background-image: url(':css/logo-other');");
+    if (walletFrame) walletFrame->gotoOtherPage();
+    bover->show();
+    uands->show();
+    bbcrstatstab->setChecked(false);
+    bexplorertab->setChecked(false);
+    bmarkettab->setChecked(false);
+    bothertab->setChecked(true);
 }
 
 void BitcreditGUI::gotoSignMessageTab(QString addr)
@@ -682,7 +984,9 @@ void BitcreditGUI::setNumConnections(int count)
     case 7: case 8: case 9: icon = ":/icons/connect_3"; break;
     default: icon = ":/icons/connect_4"; break;
     }
-    labelConnectionsIcon->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    //labelConnectionsIcon->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelConnectionsIcon->setPixmap(icon);
+    //labelConnectionsIcon->setPixmap(icon.scaled(20, 20, Qt::IgnoreAspectRatio, Qt::FastTransformation));
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Bitcredit network", "", count));
 }
 
@@ -692,7 +996,7 @@ void BitcreditGUI::setNumBlocks(int count, const QDateTime& blockDate, double nV
         return;
 
     // Prevent orphan statusbar messages (e.g. hover Quit in main menu, wait until chain-sync starts -> garbelled text)
-    statusBar()->clearMessage();
+    //statusBar()->clearMessage();
 
     // Acquire current block source
     enum BlockSource blockSource = clientModel->getBlockSource();
@@ -723,7 +1027,7 @@ void BitcreditGUI::setNumBlocks(int count, const QDateTime& blockDate, double nV
     if(secs < 90*60)
     {
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
-        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/synced").pixmap(18, 18));
 
 #ifdef ENABLE_WALLET
         if(walletFrame)
@@ -771,7 +1075,7 @@ void BitcreditGUI::setNumBlocks(int count, const QDateTime& blockDate, double nV
         {
             labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(QString(
                 ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
-                .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+                .pixmap(18, 18));
             spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
         }
         prevBlocks = count;
@@ -963,7 +1267,7 @@ void BitcreditGUI::setEncryptionStatus(int status)
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
-        labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(18,18));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
@@ -971,7 +1275,7 @@ void BitcreditGUI::setEncryptionStatus(int status)
         break;
     case WalletModel::Locked:
         labelEncryptionIcon->show();
-        labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_closed").pixmap(18,18));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
@@ -1073,28 +1377,15 @@ void BitcreditGUI::unsubscribeFromCoreSignals()
     uiInterface.ThreadSafeMessageBox.disconnect(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
 }
 
-UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *platformStyle) :
-    optionsModel(0),
-    menu(0)
+void BitcreditGUI::mousePressEvent(QMouseEvent *event) 
 {
-    createContextMenu();
-    setToolTip(tr("Unit to show amounts in. Click to select another unit."));
-    QList<BitcreditUnits::Unit> units = BitcreditUnits::availableUnits();
-    int max_width = 0;
-    const QFontMetrics fm(font());
-    Q_FOREACH (const BitcreditUnits::Unit unit, units)
-    {
-        max_width = qMax(max_width, fm.width(BitcreditUnits::name(unit)));
-    }
-    setMinimumSize(max_width, 0);
-    setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setStyleSheet(QString("QLabel { color : %1 }").arg(platformStyle->SingleColor().name()));
+    m_nMouseClick_X_Coordinate = event->x();
+    m_nMouseClick_Y_Coordinate = event->y();
 }
 
-/** So that it responds to button clicks */
-void UnitDisplayStatusBarControl::mousePressEvent(QMouseEvent *event)
+void BitcreditGUI::mouseMoveEvent(QMouseEvent *event) 
 {
-    onDisplayUnitsClicked(event->pos());
+    move(event->globalX() - m_nMouseClick_X_Coordinate, event->globalY() - m_nMouseClick_Y_Coordinate);
 }
 
 /** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */

@@ -123,23 +123,75 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     filter(0)
 {
     ui->setupUi(this);
+    
+    // help stylesheet find things
+    ui->btx->setObjectName("btx");
+    ui->bsend->setObjectName("bsend");
+    ui->bgetbcr->setObjectName("bgetbcr");
+    ui->bp2p->setObjectName("bp2p");
+    ui->bassets->setObjectName("bassets");
+    ui->butilities->setObjectName("butilities");
 
     // use a SingleColorIcon for the "out of sync warning" icon
     QIcon icon = platformStyle->SingleColorIcon(":/icons/warning");
     icon.addPixmap(icon.pixmap(QSize(64,64), QIcon::Normal), QIcon::Disabled); // also set the disabled icon because we are using a disabled QPushButton to work around missing HiDPI support of QLabel (https://bugreports.qt.io/browse/QTBUG-42503)
-    ui->labelTransactionsStatus->setIcon(icon);
-    ui->labelWalletStatus->setIcon(icon);
+    //ui->labelTransactionsStatus->setIcon(icon);
+    //ui->labelWalletStatus->setIcon(icon);
 
     // Recent transactions
-    ui->listTransactions->setItemDelegate(txdelegate);
-    ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
-    ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
+    //ui->listTransactions->setItemDelegate(txdelegate);
+    //ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
+    //ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
+    //ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
+    //connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
+    
+    // emit signals when menu buttons clicked that walletview can pick up to switch pages
+    connect(ui->btx, SIGNAL(clicked()), this, SLOT(emitbtxclicked()));
+    connect(ui->bsend, SIGNAL(clicked()), this, SLOT(emitbsendclicked()));
+    connect(ui->bgetbcr, SIGNAL(clicked()), this, SLOT(emitbgetbcrclicked()));
+    connect(ui->bp2p, SIGNAL(clicked()), this, SLOT(emitbp2pclicked()));
+    connect(ui->bassets, SIGNAL(clicked()), this, SLOT(emitbassetsclicked()));
+    connect(ui->butilities, SIGNAL(clicked()), this, SLOT(emitbutilitiesclicked()));
+    
+}
+
+void OverviewPage::emitbtxclicked()
+{
+    Q_EMIT btxclicked();
+}
+
+void OverviewPage::emitbsendclicked()
+{
+    Q_EMIT bsendclicked();
+}
+
+void OverviewPage::emitbrecclicked()
+{
+    Q_EMIT brecclicked();
+}
+
+void OverviewPage::emitbgetbcrclicked()
+{
+    Q_EMIT bgetbcrclicked();
+}
+
+void OverviewPage::emitbp2pclicked()
+{
+    Q_EMIT bp2pclicked();
+}
+
+void OverviewPage::emitbassetsclicked()
+{
+    Q_EMIT bassetsclicked();
+}
+
+void OverviewPage::emitbutilitiesclicked()
+{
+    Q_EMIT butilitiesclicked();
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -163,37 +215,41 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
     ui->labelBalance->setText(BitcreditUnits::formatWithUnit(unit, balance, false, BitcreditUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(BitcreditUnits::formatWithUnit(unit, unconfirmedBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelImmature->setText(BitcreditUnits::formatWithUnit(unit, immatureBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelTotal->setText(BitcreditUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelWatchAvailable->setText(BitcreditUnits::formatWithUnit(unit, watchOnlyBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelWatchPending->setText(BitcreditUnits::formatWithUnit(unit, watchUnconfBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelWatchImmature->setText(BitcreditUnits::formatWithUnit(unit, watchImmatureBalance, false, BitcreditUnits::separatorAlways));
-    ui->labelWatchTotal->setText(BitcreditUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, BitcreditUnits::separatorAlways));
+
+    QString bal = ui->labelBalance->text();
+    someFunctionThatChangesText(bal);
+ 
+     //ui->labelUnconfirmed->setText(BitcreditUnits::formatWithUnit(unit, unconfirmedBalance, false, BitcreditUnits::separatorAlways));
+    //ui->labelImmature->setText(BitcreditUnits::formatWithUnit(unit, immatureBalance, false, BitcreditUnits::separatorAlways));
+    //ui->labelTotal->setText(BitcreditUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, BitcreditUnits::separatorAlways));
+    //ui->labelWatchAvailable->setText(BitcreditUnits::formatWithUnit(unit, watchOnlyBalance, false, BitcreditUnits::separatorAlways));
+    //ui->labelWatchPending->setText(BitcreditUnits::formatWithUnit(unit, watchUnconfBalance, false, BitcreditUnits::separatorAlways));
+   //ui->labelWatchImmature->setText(BitcreditUnits::formatWithUnit(unit, watchImmatureBalance, false, BitcreditUnits::separatorAlways));
+    //ui->labelWatchTotal->setText(BitcreditUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, BitcreditUnits::separatorAlways));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
-    bool showImmature = immatureBalance != 0;
-    bool showWatchOnlyImmature = watchImmatureBalance != 0;
+    //bool showImmature = immatureBalance != 0;
+    //bool showWatchOnlyImmature = watchImmatureBalance != 0;
 
     // for symmetry reasons also show immature label when the watch-only one is shown
-    ui->labelImmature->setVisible(showImmature || showWatchOnlyImmature);
-    ui->labelImmatureText->setVisible(showImmature || showWatchOnlyImmature);
-    ui->labelWatchImmature->setVisible(showWatchOnlyImmature); // show watch-only immature balance
+    //ui->labelImmature->setVisible(showImmature || showWatchOnlyImmature);
+    //ui->labelImmatureText->setVisible(showImmature || showWatchOnlyImmature);
+    //ui->labelWatchImmature->setVisible(showWatchOnlyImmature); // show watch-only immature balance
 }
 
 // show/hide watch-only labels
 void OverviewPage::updateWatchOnlyLabels(bool showWatchOnly)
 {
-    ui->labelSpendable->setVisible(showWatchOnly);      // show spendable label (only when watch-only is active)
-    ui->labelWatchonly->setVisible(showWatchOnly);      // show watch-only label
-    ui->lineWatchBalance->setVisible(showWatchOnly);    // show watch-only balance separator line
-    ui->labelWatchAvailable->setVisible(showWatchOnly); // show watch-only available balance
-    ui->labelWatchPending->setVisible(showWatchOnly);   // show watch-only pending balance
-    ui->labelWatchTotal->setVisible(showWatchOnly);     // show watch-only total balance
+    //ui->labelSpendable->setVisible(showWatchOnly);      // show spendable label (only when watch-only is active)
+    //ui->labelWatchonly->setVisible(showWatchOnly);      // show watch-only label
+    //ui->lineWatchBalance->setVisible(showWatchOnly);    // show watch-only balance separator line
+    //ui->labelWatchAvailable->setVisible(showWatchOnly); // show watch-only available balance
+    //ui->labelWatchPending->setVisible(showWatchOnly);   // show watch-only pending balance
+    //ui->labelWatchTotal->setVisible(showWatchOnly);     // show watch-only total balance
 
-    if (!showWatchOnly)
-        ui->labelWatchImmature->hide();
+    //if (!showWatchOnly)
+        //ui->labelWatchImmature->hide();
 }
 
 void OverviewPage::setClientModel(ClientModel *model)
@@ -205,6 +261,11 @@ void OverviewPage::setClientModel(ClientModel *model)
         connect(model, SIGNAL(alertsChanged(QString)), this, SLOT(updateAlerts(QString)));
         updateAlerts(model->getStatusBarWarnings());
     }
+}
+
+void OverviewPage::someFunctionThatChangesText(const QString& newtext)
+{
+    Q_EMIT textChanged(newtext);
 }
 
 void OverviewPage::setWalletModel(WalletModel *model)
@@ -221,13 +282,15 @@ void OverviewPage::setWalletModel(WalletModel *model)
         filter->setShowInactive(false);
         filter->sort(TransactionTableModel::Status, Qt::DescendingOrder);
 
-        ui->listTransactions->setModel(filter);
-        ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
+        //ui->listTransactions->setModel(filter);
+        //ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
 
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(),
                    model->getWatchBalance(), model->getWatchUnconfirmedBalance(), model->getWatchImmatureBalance());
         connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(setBalance(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)));
+        
+        connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(emitbalancechanged()));
 
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
 
@@ -250,18 +313,18 @@ void OverviewPage::updateDisplayUnit()
         // Update txdelegate->unit with the current unit
         txdelegate->unit = walletModel->getOptionsModel()->getDisplayUnit();
 
-        ui->listTransactions->update();
+        //ui->listTransactions->update();
     }
 }
 
 void OverviewPage::updateAlerts(const QString &warnings)
 {
-    this->ui->labelAlerts->setVisible(!warnings.isEmpty());
-    this->ui->labelAlerts->setText(warnings);
+    //this->ui->labelAlerts->setVisible(!warnings.isEmpty());
+    //this->ui->labelAlerts->setText(warnings);
 }
 
 void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
-    ui->labelWalletStatus->setVisible(fShow);
-    ui->labelTransactionsStatus->setVisible(fShow);
+    //ui->labelWalletStatus->setVisible(fShow);
+    //ui->labelTransactionsStatus->setVisible(fShow);
 }

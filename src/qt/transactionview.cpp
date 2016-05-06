@@ -23,6 +23,7 @@
 #include <QDateTimeEdit>
 #include <QDesktopServices>
 #include <QDoubleValidator>
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -154,6 +155,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     contextMenu->addAction(copyTxIDAction);
     contextMenu->addAction(copyTxHexAction);
     contextMenu->addAction(copyTxPlainText);
+    contextMenu->addAction(editLabelAction);
     contextMenu->addAction(showDetailsAction);
     contextMenu->addSeparator();
     contextMenu->addAction(abandonAction);

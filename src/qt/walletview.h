@@ -10,6 +10,14 @@
 #include <QStackedWidget>
 
 class BitcreditGUI;
+class BidPage;
+class P2PPage;
+class P2PLPage;
+class AssetsPage;
+class UtilitiesPage;
+class BlockExplorerPage;
+class ExchangeBrowserPage;
+class OtherPage;
 class ClientModel;
 class OverviewPage;
 class PlatformStyle;
@@ -66,6 +74,15 @@ private:
     AddressBookPage *usedReceivingAddressesPage;
 
     TransactionView *transactionView;
+    
+    BidPage *bidPage;
+    P2PPage *p2pPage;
+    P2PLPage *p2plPage;
+    AssetsPage *assetsPage;
+    UtilitiesPage *utilitiesPage;
+    BlockExplorerPage *blockExplorerPage;
+    ExchangeBrowserPage *exchangeBrowserPage;
+    OtherPage *otherPage;
 
     QProgressDialog *progressDialog;
     const PlatformStyle *platformStyle;
@@ -79,6 +96,15 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    
+    void gotoBidPage();
+    void gotoP2PPage();
+    void gotoP2PLPage();
+    void gotoAssetsPage();
+    void gotoUtilitiesPage();
+    void gotoBlockExplorerPage();
+    void gotoExchangeBrowserPage();
+    void gotoOtherPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

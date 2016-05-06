@@ -198,6 +198,7 @@ BitcreditAmountField::BitcreditAmountField(QWidget *parent) :
     amount->setLocale(QLocale::c());
     amount->installEventFilter(this);
     amount->setMaximumWidth(170);
+    amount->setObjectName("enturbulator");
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(amount);

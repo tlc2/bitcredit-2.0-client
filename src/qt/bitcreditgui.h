@@ -11,7 +11,9 @@
 
 #include "amount.h"
 
+#include <QFrame>
 #include <QLabel>
+#include <QPushButton>
 #include <QMainWindow>
 #include <QMap>
 #include <QMenu>
@@ -25,12 +27,12 @@ class OptionsModel;
 class PlatformStyle;
 class RPCConsole;
 class SendCoinsRecipient;
-class UnitDisplayStatusBarControl;
 class WalletFrame;
 class WalletModel;
 class HelpMessageDialog;
 
 class CWallet;
+class OverviewPage;
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -58,6 +60,9 @@ public:
     */
     void setClientModel(ClientModel *clientModel);
 
+    QLabel *labelHeaderBalance;
+
+
 #ifdef ENABLE_WALLET
     /** Set the wallet model.
         The wallet model represents a bitcredit wallet, and offers access to the list of transactions, address book and sending
@@ -75,12 +80,36 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     bool eventFilter(QObject *object, QEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    int m_nMouseClick_X_Coordinate;
+    int m_nMouseClick_Y_Coordinate;
 
 private:
     ClientModel *clientModel;
     WalletFrame *walletFrame;
 
-    UnitDisplayStatusBarControl *unitDisplayControl;
+    QPushButton *Logo;
+    QPushButton *bover;
+    QFrame *bframe;
+    QLabel *labelBalance;
+
+    QWidget *sendrec;
+    QPushButton *bsendtab;
+    QPushButton *brectab;
+    
+    QWidget *p2p;
+    QPushButton *bborrow;
+    QPushButton *blend;
+    
+    QWidget *uands;
+    QPushButton *bbcrstatstab;
+    QPushButton *bexplorertab;
+    QPushButton *bmarkettab;
+    QPushButton *bothertab;
+
+    QWidget *toolbar2;
+
     QLabel *labelEncryptionIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
@@ -146,6 +175,14 @@ Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
     void receivedURI(const QString &uri);
 
+    // called from walletView to call bitcreditgui->walletFrame->blah()
+    void backitup();
+    void usedsending();
+    void usedreceiving();
+    //void enc();
+    
+    
+
 public Q_SLOTS:
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
@@ -184,6 +221,23 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    
+    void gotoBidPage();
+    void gotoP2PPage();
+    void gotoP2PLPage();
+    void gotoAssetsPage();
+    void gotoUtilitiesPage();
+    void gotoBlockExplorerPage();
+    void gotoExchangeBrowserPage();
+    void gotoOtherPage();
+    
+    void emitbackitup();
+    void emitusedsending();
+    void emitusedreceiving();
+    void enc();
+    void changepw(); 
+    
+    
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

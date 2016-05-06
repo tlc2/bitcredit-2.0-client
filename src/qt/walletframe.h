@@ -59,6 +59,15 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    
+    void gotoBidPage();
+    void gotoP2PPage();
+    void gotoP2PLPage();
+    void gotoAssetsPage();
+    void gotoUtilitiesPage();
+    void gotoBlockExplorerPage();
+    void gotoExchangeBrowserPage();
+    void gotoOtherPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

@@ -19,6 +19,15 @@
 #include "transactionview.h"
 #include "walletmodel.h"
 
+#include "bidpage.h"
+#include "p2ppage.h"
+#include "p2plpage.h"
+#include "assetspage.h"
+#include "utilitiespage.h"
+#include "blockexplorerpage.h"
+#include "exchangebrowserpage.h"
+#include "otherpage.h"
+
 #include "ui_interface.h"
 
 #include <QAction>
@@ -59,10 +68,28 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     usedSendingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::SendingTab, this);
     usedReceivingAddressesPage = new AddressBookPage(platformStyle, AddressBookPage::ForEditing, AddressBookPage::ReceivingTab, this);
 
+    // add other BCR pages
+    bidPage = new BidPage(this);
+    p2pPage = new P2PPage(this);
+    p2plPage = new P2PLPage(this);
+    assetsPage = new AssetsPage(this);
+    utilitiesPage = new UtilitiesPage(this);
+    blockExplorerPage = new BlockExplorerPage(this);
+    exchangeBrowserPage = new ExchangeBrowserPage(this);
+    otherPage = new OtherPage(this);
+
     addWidget(overviewPage);
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
+    addWidget(bidPage);
+    addWidget(p2pPage);
+    addWidget(p2plPage);
+    addWidget(assetsPage);
+    addWidget(utilitiesPage);
+    addWidget(blockExplorerPage);
+    addWidget(exchangeBrowserPage);
+    addWidget(otherPage);
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -87,6 +114,34 @@ void WalletView::setBitcreditGUI(BitcreditGUI *gui)
 {
     if (gui)
     {
+        // keep header balance uipdated
+        connect(overviewPage, SIGNAL(textChanged(QString)), gui->labelHeaderBalance, SLOT(setText(QString)));
+        
+        // connect signals from menu page to bitcreditgui slots to switch pages
+        connect(overviewPage, SIGNAL(btxclicked()), gui, SLOT(gotoHistoryPage()));
+        connect(overviewPage, SIGNAL(bsendclicked()), gui, SLOT(gotoSendCoinsPage()));
+        connect(overviewPage, SIGNAL(brecclicked()), gui, SLOT(gotoReceiveCoinsPage()));
+        connect(overviewPage, SIGNAL(bgetbcrclicked()), gui, SLOT(gotoBidPage()));
+        connect(overviewPage, SIGNAL(bp2pclicked()), gui, SLOT(gotoP2PPage()));
+        connect(overviewPage, SIGNAL(bborrowclicked()), gui, SLOT(gotoP2PPage()));
+        connect(overviewPage, SIGNAL(blendclicked()), gui, SLOT(gotoP2PLPage()));
+        connect(overviewPage, SIGNAL(bassetsclicked()), gui, SLOT(gotoAssetsPage()));
+        connect(overviewPage, SIGNAL(butilitiesclicked()), gui, SLOT(gotoUtilitiesPage()));
+        
+        // connect signals from otherpage to bitcreditgui slots to call menu actions
+        connect(otherPage, SIGNAL(bURIclicked()), gui, SLOT(openClicked()));
+        connect(otherPage, SIGNAL(bBackupclicked()), gui, SLOT(emitbackitup()));
+        connect(otherPage, SIGNAL(bSignmessageclicked()), gui, SLOT(gotoSignMessageTab()));
+        connect(otherPage, SIGNAL(bVerifymessageclicked()), gui, SLOT(gotoVerifyMessageTab()));
+        connect(otherPage, SIGNAL(bSendingaddressesclicked()), gui, SLOT(emitusedsending()));
+        connect(otherPage, SIGNAL(bReceivingaddressesclicked()), gui, SLOT(emitusedreceiving()));
+        connect(otherPage, SIGNAL(bEncclicked()), gui, SLOT(enc()));
+        connect(otherPage, SIGNAL(bChangeclicked()), gui, SLOT(changepw()));
+        connect(otherPage, SIGNAL(bOptionsclicked()), gui, SLOT(optionsClicked()));
+        connect(otherPage, SIGNAL(bRPCclicked()), gui, SLOT(showDebugWindowActivateConsole()));
+        connect(otherPage, SIGNAL(bHelpclicked()), gui, SLOT(showHelpMessageClicked()));
+        
+
         // Clicking on a transaction on the overview page simply sends you to transaction history page
         connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), gui, SLOT(gotoHistoryPage()));
 
@@ -183,6 +238,46 @@ void WalletView::gotoSendCoinsPage(QString addr)
 
     if (!addr.isEmpty())
         sendCoinsPage->setAddress(addr);
+}
+
+void WalletView::gotoBidPage()
+{
+    setCurrentWidget(bidPage);
+}
+
+void WalletView::gotoP2PPage()
+{
+    setCurrentWidget(p2pPage);
+}
+
+void WalletView::gotoP2PLPage()
+{
+    setCurrentWidget(p2plPage);
+}
+
+void WalletView::gotoAssetsPage()
+{
+    setCurrentWidget(assetsPage);
+}
+
+void WalletView::gotoUtilitiesPage()
+{
+    setCurrentWidget(utilitiesPage);
+}
+
+void WalletView::gotoBlockExplorerPage()
+{
+    setCurrentWidget(blockExplorerPage);
+}
+
+void WalletView::gotoExchangeBrowserPage()
+{
+    setCurrentWidget(exchangeBrowserPage);
+}
+
+void WalletView::gotoOtherPage()
+{
+    setCurrentWidget(otherPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

@@ -22,10 +22,10 @@ static const struct {
     /** Extra padding/spacing in transactionview */
     const bool useExtraSpacing;
 } platform_styles[] = {
-    {"macosx", false, false, true},
-    {"windows", true, false, false},
+    {"macosx", false, false, false},
+    {"windows", false, false, false},
     /* Other: linux, unix, ... */
-    {"other", true, true, false}
+    {"other", false, false, false}
 };
 static const unsigned platform_styles_count = sizeof(platform_styles)/sizeof(*platform_styles);
 
@@ -52,7 +52,7 @@ QIcon ColorizeIcon(const QIcon& ico, const QColor& colorbase)
     Q_FOREACH(sz, ico.availableSizes())
     {
         QImage img(ico.pixmap(sz).toImage());
-        MakeSingleColorImage(img, colorbase);
+        //MakeSingleColorImage(img, colorbase);
         new_ico.addPixmap(QPixmap::fromImage(img));
     }
     return new_ico;
@@ -61,7 +61,7 @@ QIcon ColorizeIcon(const QIcon& ico, const QColor& colorbase)
 QImage ColorizeImage(const QString& filename, const QColor& colorbase)
 {
     QImage img(filename);
-    MakeSingleColorImage(img, colorbase);
+    //MakeSingleColorImage(img, colorbase);
     return img;
 }
 

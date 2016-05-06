@@ -4,6 +4,9 @@
 #include "clientmodel.h"
 
 #include <QWidget>
+#include <QFrame>
+#include <QLabel>
+
 
 namespace Ui
 {
@@ -21,24 +24,24 @@ public:
     QString str;
     QString btctotal;
     double btctot;
-    std::string theme;
 
     void setClientModel(ClientModel *model);
 
-private slots:
+private:
+    Ui::BidPage *ui;
+    ClientModel *clientModel;
+
+private Q_SLOTS:
     void SummonBTCWallet();   
     void SummonBTCExplorer(); 
     void GetBids();
     void setNumBlocks(int count);
     int getNumBlocks();
     void Estimate();
+    void RPC();
 
-    QString getDefaultDataDirectory();
+    QString getDataDirectory();
     QString pathAppend(const QString& path1, const QString& path2);
-
-private:
-    Ui::BidPage *ui;
-    ClientModel *clientModel;
 
 };
 

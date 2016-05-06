@@ -9,6 +9,8 @@
 #include "basenodeman.h"
 #include "bidtracker.h"
 
+#include <cstdlib>
+
 #include <fstream>
 #include <QMessageBox>
 #include <QDesktopServices>
@@ -25,64 +27,12 @@ BidPage::BidPage(QWidget *parent)
     ui->setupUi(this);
 
     ui->lineEditBid->setEnabled(false);  //  cannot calc until update clicked and data fetched
-    ui->label_BTCassets->setStyleSheet("border: none");
 
     connect(ui->pushButtonBTCExplorer, SIGNAL(clicked()), this, SLOT(SummonBTCExplorer()));
     connect(ui->pushButtonBTC, SIGNAL(clicked()), this, SLOT(SummonBTCWallet()));
     connect(ui->pushButtonRefresh, SIGNAL(clicked()), this, SLOT(GetBids()));
     connect(ui->lineEditBid, SIGNAL(returnPressed()), this, SLOT(Estimate()));
-
-    theme = GetArg("-theme", "");
-    QString themestring = QString::fromUtf8(theme.c_str());
-    if (themestring.contains("orange"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #ffa405");
-        ui->frame->setStyleSheet("border: 2px solid #ffa405");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("dark"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #ffa405");
-        ui->frame->setStyleSheet("border: 2px solid #ffa405");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("green"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #45f806");
-        ui->frame->setStyleSheet("border: 2px solid #45f806");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("blue"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #031cd7");
-        ui->frame->setStyleSheet("border: 2px solid #031cd7");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("pink"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #ff03a3");
-        ui->frame->setStyleSheet("border: 2px solid #ff03a3");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("purple"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #a106a7");
-        ui->frame->setStyleSheet("border: 2px solid #a106a7");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    else if (themestring.contains("turq"))
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #0ab4dc");
-        ui->frame->setStyleSheet("border: 2px solid #0ab4dc");
-        ui->label_heading->setStyleSheet("border: none");
-    }
-    //fallback on default
-    else
-    {
-        ui->pushButtonRefresh->setStyleSheet("border: 2px solid #ffa405");
-        ui->frame->setStyleSheet("border: 1px solid #ffa405");
-        ui->label_heading->setStyleSheet("border: none");
-    }
+    connect(ui->bImport, SIGNAL(clicked()), this, SLOT(RPC()));
 }
 
 void BidPage::setClientModel(ClientModel *model)
@@ -126,7 +76,7 @@ void BidPage::GetBids()
     Bidtracker r;
     double btcassets = r.getbalance("https://blockchain.info/q/addressbalance/16bi8R4FoDHfjNJ1RhpvcAEn4Cz78FbtZB");
     QString reserves = QString::number(btcassets/COIN, 'f', 8);
-    ui->label_BTCassets->setText("Current BTC reserves: " + reserves);
+    ui->labelReserves->setText(reserves);
 
     // calc time until next 00:00 GMT
     long int startdate = 1450396800; // 18 December 2015 00:00
@@ -137,7 +87,7 @@ void BidPage::GetBids()
     ui->labelNumber->setText(GUIUtil::formatDurationStr(until));
 
     // get default datadir, tack on bidtracker
-    QString dataDir = getDefaultDataDirectory();
+    QString dataDir = getDataDirectory();
     QString bidDir = "bidtracker";
     QString datPath = pathAppend(dataDir, bidDir);
 
@@ -191,9 +141,9 @@ QString BidPage::pathAppend(const QString& path1, const QString& path2)
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
-QString BidPage::getDefaultDataDirectory()
+QString BidPage::getDataDirectory()
 {
-    return GUIUtil::boostPathToQString(GetDefaultDataDir());
+    return GUIUtil::boostPathToQString(GetDataDir());
 }
 
 void BidPage::SummonBTCExplorer()
@@ -209,6 +159,71 @@ void BidPage::SummonBTCWallet()
     #elif _WIN32
         proc->startDetached("bitcredit-qt.exe");
     #endif
+}
+
+void BidPage::RPC()
+{
+    // check there's something to work with
+    if (ui->lineEditPassphrase->text() == "") 
+    {
+        ui->lineEditPassphrase->setText("ENTER YOUR WALLET PASSPHRASE");
+        return;
+    }
+    if (ui->lineEditPrivkey->text() == "") 
+    {
+        ui->lineEditPrivkey->setText("ENTER THE BITCOIN ADDRESS PRIVATE KEY");
+        return;        
+    }
+
+    // get working data directory
+    QString cwd = GUIUtil::boostPathToQString(GetDataDir());
+
+    // get password
+    QString pwd = ui->lineEditPassphrase->text();
+
+    // build RPC call
+    QString callnix = cwd + "/bitcredit-cli --datadir=" + cwd + " walletpassphrase " + pwd + " 60";
+    QString callwin = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " walletpassphrase " + pwd + " 60";
+
+    // unlock wallet
+    QProcess *proc2 = new QProcess(this);
+    #ifdef linux
+        proc2->start(callnix);
+        proc2->waitForFinished();
+        QString output(proc2->readAllStandardOutput()); // check for any output
+        // reset pwd field
+        ui->lineEditPassphrase->setText("");
+    #elif _WIN32
+        proc2->start(callwin);
+        proc2->waitForFinished();
+        QString output(proc2->readAllStandardOutput()); // check for any output
+        // reset pwd field
+        ui->lineEditPassphrase->setText("");       
+    #endif
+
+    // get privkey
+    QString privkey = ui->lineEditPrivkey->text();
+
+    // build RPC call
+    QString callnix2 = cwd + "/bitcredit-cli --datadir=" + cwd + " importprivkey " + privkey;
+    QString callwin2 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " importprivkey " + privkey;
+
+    // import privkey
+    QProcess *proc3 = new QProcess(this);
+    #ifdef linux
+        proc3->start(callnix2);
+        proc3->waitForFinished();
+        QString output2(proc3->readAllStandardOutput()); // check for any output
+        // reset privkey field
+        ui->lineEditPrivkey->setText("");
+    #elif _WIN32
+        proc3->start(callwin2);
+        proc3->waitForFinished();
+        QString output2(proc3->readAllStandardOutput()); // check for any output
+        // reset privkey field
+        ui->lineEditPrivkey->setText(output);
+    #endif    
+
 }
 
 BidPage::~BidPage()
