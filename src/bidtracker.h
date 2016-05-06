@@ -15,7 +15,7 @@ void getbids();
 
 extern int totalbid;
 extern std::map<std::string,double> getbidtracker();
-
+extern size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 class Bidtracker
 {
 public:

@@ -18,11 +18,10 @@ public:
     CURLcode res;
     CURL *curl;
 	void getverifieddata();
-	bool sendloanrequest(string address, int64_t amount, int premium, int expiry, int period, string message, string tx);
-	bool sendloan(string address,string receiver,string  reqtx ,int64_t amount,string requestid,string message,string tx);
-	bool registeraddress(string address, string bitcointx,string tx);
-	bool reportloandefault(string address, string defaulter, string reqtx, string loantx, int64_t amount, string requestid,string tx);
-
+	void process_conn_client(int s,string d);
+	bool senddata(string data);
+	void getcreditratings();
+	
 };
 
 #endif

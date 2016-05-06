@@ -68,7 +68,13 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
     SendMoney(address.Get(), nAmount, true, wtx);
     string tx= wtx.GetHash().GetHex();
     
-    return loanmgr.sendloanrequest(strAddress, amount, premium, expiry, period, message, tx);    
+    std::stringstream raw;
+
+	raw<<"address="<<strAddress<<'&'<<"amount="<<amount<<'&'<<"premium="<<premium<<'&'<<"expiry="<<expiry<<'&'<<"period="<<period<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
+
+	string request = raw.str();
+
+    return loanmgr.senddata(request);
         
 }
 
@@ -115,7 +121,13 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
     string requestid  = params[4].get_str();
     string message  = params[5].get_str();
    
-    return loanmgr.sendloan(strAddress, receiver, reqtx ,  amount, requestid, message, tx);    
+	std::stringstream raw;
+
+	raw<<"address="<<strAddress<<'&'<<"receiver="<<receiver<<'&'<<"reqtx="<<reqtx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
+	
+	string request = raw.str();   
+   
+    return loanmgr.senddata(request);   
         
 }
 
@@ -161,9 +173,14 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
 	string loantx  = params[3].get_str();
     int64_t amount     = params[4].get_int64();
     string requestid  = params[5].get_str();
-   
-    return loanmgr.reportloandefault(strAddress, defaulter, reqtx, loantx, amount, requestid, tx);    
-        
+
+	std::stringstream raw;
+
+	raw<<"address="<<strAddress<<'&'<<"defaulter="<<defaulter<<'&'<<"reqtx="<<reqtx<<'&'<<"loantx="<<loantx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"tx="<<tx<<' ';
+
+	string request = raw.str();
+    return loanmgr.senddata(request);
+    
 }
 
 UniValue registeraddress(const UniValue& params, bool fHelp)
@@ -189,19 +206,20 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 
     CBitcreditAddress address("5qoFUCqPUE4pyjus6U6jD6ba4oHR6NZ7c7");
 
-    // Fee Amount
     CAmount nAmount = AmountFromValue(5000);
-
     EnsureWalletIsUnlocked();
-
     SendMoney(address.Get(), nAmount, true, wtx);
     
-    string tx= wtx.GetHash().GetHex();
-    
+    string tx= wtx.GetHash().GetHex();    
 	string strAddress  = params[0].get_str();
-	string bitcointx  = params[1].get_str();
-   
-    return loanmgr.registeraddress(strAddress, bitcointx, tx);    
+	string bitcointx  = params[1].get_str(); 
+	std::stringstream raw;
+
+	raw<<"address="<<strAddress<<'&'<<"bitcointx="<<bitcointx<<'&'<<"tx="<<tx<<' ';
+
+	string request = raw.str(); 
+    return loanmgr.senddata(request);
+    //return loanmgr.registeraddress(strAddress, bitcointx, tx);    
         
 }
 

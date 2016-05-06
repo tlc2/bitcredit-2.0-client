@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "loanmanager.h"
+#include "bidtracker.h"
 #include "util.h"
 #include "addrman.h"
 #include "base58.h"
@@ -30,12 +31,50 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/thread.hpp>
 
-/** Loan manager */
+#define PORT 2015
+#define DEST_IP "84.200.32.78"
 
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+/** Loan manager */
+void CLoanServer::getcreditratings()
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+    std::string url = "";
+
+    const char * c = url.c_str();
+
+      std::string readBuffer;
+
+      curl = curl_easy_init();
+      if(curl) {
+		curl_global_init(CURL_GLOBAL_ALL);
+        curl_easy_setopt(curl, CURLOPT_URL, c);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Bitcredit/0.30");
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+        }
+		if(res != CURLE_OK) {
+			if (fDebug) LogPrintf("Curl Error on CLoanServer::verifyregisteredID() - %s - on URL:%s.\n", curl_easy_strerror(res), url);
+		}
+		else {
+			if (fDebug) LogPrintf("Curl Response on CLoanServer::verifyregisteredID() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
+			}
+
+    boost::filesystem::path loandir = GetDataDir() / "loandata";
+
+    if(!(boost::filesystem::exists(loandir))){
+        if(fDebug)LogPrintf("Loandir Doesn't Exists\n");
+
+        if (boost::filesystem::create_directory(loandir))
+            if(fDebug)LogPrintf("Loandir....Successfully Created !\n");
+    }
+
+	ofstream myfile((GetDataDir().string() + "/loandata/verifieddata.dat").c_str(),fstream::out);
+	myfile << readBuffer << std::endl;
+	myfile.close();
+
 }
 
 void CLoanManager::getverifieddata()
@@ -59,10 +98,10 @@ void CLoanManager::getverifieddata()
         curl_easy_cleanup(curl);
         }
 		if(res != CURLE_OK) {
-			if (fDebug) LogPrintf("Curl Error on CLoanManager::getverifieddata() - %s - on URL:%s.\n", curl_easy_strerror(res), url);
+			if (fDebug) LogPrintf("Curl Error on CLoanServer::getverifieddata() - %s - on URL:%s.\n", curl_easy_strerror(res), url);
 		}
 		else {
-			if (fDebug) LogPrintf("Curl Response on CLoanManager::getverifieddata() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
+			if (fDebug) LogPrintf("Curl Response on CLoanServer::getverifieddata() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
 			}
 
     boost::filesystem::path loandir = GetDataDir() / "loandata";
@@ -80,124 +119,64 @@ void CLoanManager::getverifieddata()
 
 }
 
-bool CLoanManager::sendloanrequest(string address, int64_t amount, int premium, int expiry, int period, string message, string tx){
- 
-#ifdef WIN32
-    curl_global_init(CURL_GLOBAL_ALL);
-#endif  
+void CLoanManager::process_conn_client(int s,string d){
 
-	std::stringstream raw;
+    ssize_t size = 0;
+    char buffer[1024];
 
-	raw<<"address="<<address<<'&'<<"amount="<<amount<<'&'<<"premium="<<premium<<'&'<<"expiry="<<expiry<<'&'<<"period="<<period<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
-	
-	string request = raw.str();
+    //read from the file to be sent
+    fstream outfile("programm.txt",ios::in|ios::out);
 
-	curl = curl_easy_init();
-	if(curl) {
-			 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://bcr-e.com/loanbook/loanrequest/");
-    
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.c_str());
- 
-		res = curl_easy_perform(curl);
- 
-		if(res != CURLE_OK){
-			//fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-			return false;
-		}
-		curl_easy_cleanup(curl);
-  }
-	return true;
+    if (outfile.fail()){
+        printf("[process infro]cannot open the file to be sent\n");
+        return ;
+    }
+    printf("[process infro]successfully open the file to be sent\n");
+
+    while(!outfile.eof()){
+
+        outfile.getline(buffer,1025,'\n');
+        write(s,buffer,1024);
+        size = read(s, buffer, 1024);
+        if(size = 0)
+        {
+            return ;
+        }
+        //write to the server
+        write(s,buffer,size);
+        //get response from the server
+        size=read(s,buffer,1024);
+        write(1,buffer,size);
+
+    }
+    outfile.close();
 }
 
-bool CLoanManager::sendloan(string address,string receiver,string  reqtx ,int64_t amount,string requestid,string message,string tx){
- 
-#ifdef WIN32
-    curl_global_init(CURL_GLOBAL_ALL);
-#endif  
+bool CLoanManager::senddata(string data){
 
-	std::stringstream raw;
+    int s;
+    struct sockaddr_in server_addr;
+    bzero(&server_addr, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(DEST_IP);
+    server_addr.sin_port =  htons(PORT);
 
-	raw<<"address="<<address<<'&'<<"receiver="<<receiver<<'&'<<"reqtx="<<reqtx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
-	
-	string request = raw.str();
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    if(s < 0)
+    {
+        cout<<"[process infro]socke error"<<endl;
+        return -1;
+    }
+    cout<<"[process infro] socket built successfully\n";
 
-	curl = curl_easy_init();
-	if(curl) {
-			 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://bcr-e.com/loanbook/newloan/");
-    
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.c_str());
- 
-		res = curl_easy_perform(curl);
- 
-		if(res != CURLE_OK){
-			//fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-			return false;
-		}
-		curl_easy_cleanup(curl);
-  }
-	return true;
+    //inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
+
+    connect(s, (struct sockaddr*)&server_addr, sizeof(struct sockaddr));
+    cout<<"[process infor] connected\n";
+    process_conn_client(s,data);
+
+    close(s);
+
+    return true;
 }
 
-bool CLoanManager::registeraddress(string address, string bitcointx,string tx){
-	
-#ifdef WIN32
-    curl_global_init(CURL_GLOBAL_ALL);
-#endif  
-
-	std::stringstream raw;
-
-	raw<<"address="<<address<<'&'<<"bitcointx="<<bitcointx<<'&'<<"tx="<<tx<<' ';
-	
-	string request = raw.str();
-
-	curl = curl_easy_init();
-	if(curl) {
-			 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://bcr-e.com/loanbook/register/");
-    
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.c_str());
- 
-		res = curl_easy_perform(curl);
- 
-		if(res != CURLE_OK){
-			//fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-			return false;
-		}
-		curl_easy_cleanup(curl);
-  }
-	return true;	
-	
-}
-
-bool CLoanManager::reportloandefault(string address, string defaulter, string reqtx, string loantx, int64_t amount, string requestid,string tx){
-
-#ifdef WIN32
-    curl_global_init(CURL_GLOBAL_ALL);
-#endif  
-
-	std::stringstream raw;
-
-	raw<<"address="<<address<<'&'<<"defaulter="<<defaulter<<'&'<<"reqtx="<<reqtx<<'&'<<"loantx="<<loantx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"tx="<<tx<<' ';
-	
-	string request = raw.str();
-
-	curl = curl_easy_init();
-	if(curl) {
-			 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://bcr-e.com/loanbook/newloan/");
-    
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.c_str());
- 
-		res = curl_easy_perform(curl);
- 
-		if(res != CURLE_OK){
-			//fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-			return false;
-		}
-		curl_easy_cleanup(curl);
-  }
-	return true;	
-	
-}
