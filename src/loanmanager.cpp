@@ -34,6 +34,11 @@
 #define PORT 2015
 #define DEST_IP "84.200.32.78"
 
+#ifdef WIN32
+#define bzero(b,len) (memset((b), '\0', (len)), (void) 0)  
+#define bcopy(b1,b2,len) (memmove((b2), (b1), (len)), (void) 0)
+#endif
+
 /** Loan manager */
 void CLoanManager::getcreditratings()
 {
@@ -122,34 +127,22 @@ void CLoanManager::getverifieddata()
 void CLoanManager::process_conn_client(int s,string d){
 
     ssize_t size = 0;
-    char buffer[1024];
+    char buffer[] = d;
 
-    //read from the file to be sent
-    fstream outfile("programm.txt",ios::in|ios::out);
-
-    if (outfile.fail()){
-        printf("[process infro]cannot open the file to be sent\n");
-        return ;
+    write(s,buffer,1024);
+    size = read(s, buffer, 1024);
+    
+    if(size = 0){
+		LogPrintf("CLoanManager::process_conn_client empty string??  !\n");
     }
-    printf("[process infro]successfully open the file to be sent\n");
+    
+    //write to the server
+    write(s,buffer,size);
+    
+    //get response from the server
+    size=read(s,buffer,1024);
+    write(1,buffer,size);
 
-    while(!outfile.eof()){
-
-        outfile.getline(buffer,1025,'\n');
-        write(s,buffer,1024);
-        size = read(s, buffer, 1024);
-        if(size = 0)
-        {
-            return ;
-        }
-        //write to the server
-        write(s,buffer,size);
-        //get response from the server
-        size=read(s,buffer,1024);
-        write(1,buffer,size);
-
-    }
-    outfile.close();
 }
 
 bool CLoanManager::senddata(string data){
@@ -163,16 +156,17 @@ bool CLoanManager::senddata(string data){
 
     s = socket(AF_INET, SOCK_STREAM, 0);
     if(s < 0)
-    {
-        cout<<"[process infro]socke error"<<endl;
-        return -1;
+    {        
+        LogPrintf("CLoanManager::senddata [process infro]socke error  !\n");
+        return false;
     }
-    cout<<"[process infro] socket built successfully\n";
+    LogPrintf("CLoanManager::senddata [process infro] socket built successfully  !\n");
 
     //inet_pton(AF_INET, argv[1], &server_addr.sin_addr);
 
     connect(s, (struct sockaddr*)&server_addr, sizeof(struct sockaddr));
-    cout<<"[process infor] connected\n";
+    LogPrintf("CLoanManager::senddata [process infor] connected  !\n");
+
     process_conn_client(s,data);
 
     close(s);

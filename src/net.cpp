@@ -1788,11 +1788,6 @@ void ThreadMessageHandler()
     }
 }
 
-
-
-
-
-
 bool BindListenPort(const CService &addrBind, string& strError, bool fWhitelisted)
 {
     strError = "";
