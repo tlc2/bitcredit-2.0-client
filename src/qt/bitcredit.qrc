@@ -67,6 +67,7 @@
         <file alias="logo-market">res/css/logo-market.png</file>
         <file alias="logo-other">res/css/logo-other.png</file>
         <file alias="up_arrow">res/css/up_arrow.png</file>
+        <file alias="intro">res/css/intro.png</file>
         <file alias="down_arrow">res/css/down_arrow.png</file>
     </qresource>
     <qresource prefix="/movies">
