@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QFrame>
 #include <QLabel>
+#include <QProcess>
 
 
 namespace Ui
@@ -24,21 +25,29 @@ public:
     QString str;
     QString btctotal;
     double btctot;
+    int until;
+    float podl;
 
     void setClientModel(ClientModel *model);
 
 private:
     Ui::BidPage *ui;
     ClientModel *clientModel;
+    
+    QProcess *proc;
+    QProcess *proc2;
+    QProcess *proc3;
 
 private Q_SLOTS:
-    void SummonBTCWallet();   
+    void SummonElectrum();   
     void SummonBTCExplorer(); 
     void GetBids();
     void setNumBlocks(int count);
     int getNumBlocks();
     void Estimate();
     void RPC();
+    
+    bool fileExists(QString path);
 
     QString getDataDirectory();
     QString pathAppend(const QString& path1, const QString& path2);

@@ -563,7 +563,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButtonBTC">
+  <widget class="QPushButton" name="bElectrum">
    <property name="geometry">
     <rect>
      <x>700</x>
@@ -591,7 +591,7 @@
     </font>
    </property>
    <property name="toolTip">
-    <string>Launch bitcoin-qt (if installed)</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch Electrum Bitcoin wallet (if installed)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>Bid</string>

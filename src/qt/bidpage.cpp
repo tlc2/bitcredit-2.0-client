@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
+#include <QFileInfo>
 
 BidPage::BidPage(QWidget *parent)
     : QWidget(parent), ui(new Ui::BidPage)
@@ -29,7 +30,7 @@ BidPage::BidPage(QWidget *parent)
     ui->lineEditBid->setEnabled(false);  //  cannot calc until update clicked and data fetched
 
     connect(ui->pushButtonBTCExplorer, SIGNAL(clicked()), this, SLOT(SummonBTCExplorer()));
-    connect(ui->pushButtonBTC, SIGNAL(clicked()), this, SLOT(SummonBTCWallet()));
+    connect(ui->bElectrum, SIGNAL(clicked()), this, SLOT(SummonElectrum()));
     connect(ui->pushButtonRefresh, SIGNAL(clicked()), this, SLOT(GetBids()));
     connect(ui->lineEditBid, SIGNAL(returnPressed()), this, SLOT(Estimate()));
     connect(ui->bImport, SIGNAL(clicked()), this, SLOT(RPC()));
@@ -116,11 +117,10 @@ void BidPage::GetBids()
        bidsFile.close();
     }
 
-    // btctot, ltctot and dashtot are in satoshis, so divide by 10000000 to get right units
-    // to do - add radiobuttons or dropdown to select sats or not?
+    // btctot in satoshis, so divide by 10000000 to get right units
     double btctotU = btctot / 100000000;
     QString btctotal = QString::number(btctotU, 'f', 8);
-    //ui->labelBTC_2->setText(btctotal);
+    //ui->labelTotal_2->setText(btctotal);
 
     // add 'em up and display 'em
     double alltot = btctotU;
@@ -128,7 +128,7 @@ void BidPage::GetBids()
     ui->labelTotal_2->setText(alltotal);
 
     // calc price per BCR based on total bids and display it
-    double bcrprice = alltot / 18000;
+    double bcrprice = btctotU / 18000;
     QString bcrPrice = QString::number(bcrprice, 'f', 8);
     ui->labelEstprice_2->setText(bcrPrice);
 
@@ -151,32 +151,45 @@ void BidPage::SummonBTCExplorer()
     QDesktopServices::openUrl(QUrl("https://btc.blockr.io/address/info/1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu", QUrl::TolerantMode));
 }
 
-void BidPage::SummonBTCWallet()
+void BidPage::SummonElectrum()
 {
-    QProcess *proc = new QProcess(this);
-    #ifdef linux
-        proc->startDetached("bitcredit-qt");
+    proc = new QProcess(this);
+    #ifdef __linux
+        proc->startDetached("electrum");
     #elif _WIN32
-        proc->startDetached("bitcredit-qt.exe");
+        proc->startDetached("electrum.exe");
     #endif
+}
+
+bool BidPage::fileExists(QString path) 
+{
+    QFileInfo check_file(path);
+    // check if file exists and if yes: Is it really a file and no directory?
+    return check_file.exists();
 }
 
 void BidPage::RPC()
 {
     // check there's something to work with
-    if (ui->lineEditPassphrase->text() == "") 
+    if (ui->lineEditPassphrase->text() == "" || ui->lineEditPrivkey->text() == "") 
     {
-        ui->lineEditPassphrase->setText("ENTER YOUR WALLET PASSPHRASE");
+        ui->lineEditPrivkey->setText("ENTER YOUR WALLET PASSPHRASE AND THE PRIVKEY OF THE BTC ADDRESS YOU BID FROM");
         return;
     }
-    if (ui->lineEditPrivkey->text() == "") 
-    {
-        ui->lineEditPrivkey->setText("ENTER THE BITCOIN ADDRESS PRIVATE KEY");
-        return;        
-    }
-
+  
     // get working data directory
     QString cwd = GUIUtil::boostPathToQString(GetDataDir());
+
+    // check bitcredit-cli and bitcredit-conf exist in cwd
+    QString cli = "bitcredit-cli";
+    QString clipath = pathAppend(cwd, cli);
+    QString conf = "bitcredit.conf";
+    QString confpath = pathAppend(cwd, conf);
+
+   if (!fileExists(clipath) || !fileExists(confpath))
+    {
+        QMessageBox::information(0, QString("Attention!"), QString("Please make sure that bitcredit-cli(.exe) exists in the same directory as the currently loaded wallet.\n\nYou must also have a bitcredit.conf file present, containing the following:\n\nrpcuser=blah\nrpcpassword=blahblah\nrpcallowip=127.0.0.1\nserver=1\n\nOnce these are in place, please restart bitcredit-qt to proceed."), QMessageBox::Ok); 
+    }
 
     // get password
     QString pwd = ui->lineEditPassphrase->text();
@@ -186,17 +199,17 @@ void BidPage::RPC()
     QString callwin = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " walletpassphrase " + pwd + " 60";
 
     // unlock wallet
-    QProcess *proc2 = new QProcess(this);
-    #ifdef linux
+    proc2 = new QProcess(this);
+    #ifdef __linux
         proc2->start(callnix);
         proc2->waitForFinished();
-        QString output(proc2->readAllStandardOutput()); // check for any output
+        //QString output(proc2->readAllStandardOutput()); // check for any output
         // reset pwd field
         ui->lineEditPassphrase->setText("");
     #elif _WIN32
         proc2->start(callwin);
         proc2->waitForFinished();
-        QString output(proc2->readAllStandardOutput()); // check for any output
+        //QString output(proc2->readAllStandardOutput()); // check for any output
         // reset pwd field
         ui->lineEditPassphrase->setText("");       
     #endif
@@ -209,8 +222,8 @@ void BidPage::RPC()
     QString callwin2 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " importprivkey " + privkey;
 
     // import privkey
-    QProcess *proc3 = new QProcess(this);
-    #ifdef linux
+    proc3 = new QProcess(this);
+    #ifdef __linux
         proc3->start(callnix2);
         proc3->waitForFinished();
         QString output2(proc3->readAllStandardOutput()); // check for any output
