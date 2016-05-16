@@ -55,16 +55,15 @@ int BidPage::getNumBlocks()
 void BidPage::setNumBlocks(int count)
 {
     ui->labelNumber->setText(QString::number(count));
-
 }
 
 void BidPage::Estimate()
 {
-    QString bidtotal = ui->labelTotal_2->text();
+    QString bidtotal = ui->labelBids->text();
     float bidz = bidtotal.toFloat();
     float mybid = ui->lineEditBid->text().toFloat();
     float newtotal = bidz + mybid;
-    float mybcr = (mybid / newtotal) * 18000;
+    float mybcr = (mybid / newtotal) * 18000 * podl; 
     QString mybcrz = QString::number(mybcr);
     float cost = mybid / mybcr;
     QString coststr = QString::number(cost, 'f', 8);
@@ -73,12 +72,18 @@ void BidPage::Estimate()
 
 void BidPage::GetBids()
 {
-    // get current BTC assets
     Bidtracker r;
+    
+    // get current BTC resrve assets
     double btcassets = r.getbalance("https://blockchain.info/q/addressbalance/16bi8R4FoDHfjNJ1RhpvcAEn4Cz78FbtZB");
     QString reserves = QString::number(btcassets/COIN, 'f', 8);
     ui->labelReserves->setText(reserves);
-
+    
+    // get current bids
+    double bids = r.getbalance("https://blockchain.info/q/addressbalance/1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu");
+    QString bidz = QString::number(bids/COIN, 'f', 8);
+    ui->labelBids->setText(bidz);    
+    
     // calc time until next 00:00 GMT
     long int startdate = 1450396800; // 18 December 2015 00:00
     long int current = GetTime();
@@ -87,6 +92,10 @@ void BidPage::GetBids()
     int until = 86400 - (diff % 86400);
     ui->labelNumber->setText(GUIUtil::formatDurationStr(until));
 
+    // percentage of day left for use in calculator estimate
+    podl = (float)until/86400;
+
+/*  //  no files being geberated yet in bidtracker dir so we'll just calc based on what the bids are we just pulled from blockchain.info
     // get default datadir, tack on bidtracker
     QString dataDir = getDataDirectory();
     QString bidDir = "bidtracker";
@@ -126,15 +135,16 @@ void BidPage::GetBids()
     double alltot = btctotU;
     QString alltotal = QString::number(alltot, 'f', 8);
     ui->labelTotal_2->setText(alltotal);
+*/
 
     // calc price per BCR based on total bids and display it
-    double bcrprice = btctotU / 18000;
+    //double bcrprice = btctotU / 18000;
+    double bcrprice = (bids / 18000) / 100000000;
     QString bcrPrice = QString::number(bcrprice, 'f', 8);
     ui->labelEstprice_2->setText(bcrPrice);
 
     ui->lineEditBid->setEnabled(true);
 }
-
 
 QString BidPage::pathAppend(const QString& path1, const QString& path2)
 {

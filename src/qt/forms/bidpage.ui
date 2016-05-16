@@ -38,7 +38,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>-146</y>
+      <y>0</y>
       <width>814</width>
       <height>536</height>
      </rect>
@@ -447,7 +447,7 @@
       <enum>QLineEdit::Password</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="labelTotal_2">
+    <widget class="QLabel" name="labelBids">
      <property name="geometry">
       <rect>
        <x>230</x>
