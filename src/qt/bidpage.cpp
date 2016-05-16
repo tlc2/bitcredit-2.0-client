@@ -155,9 +155,11 @@ void BidPage::SummonElectrum()
 {
     proc = new QProcess(this);
     #ifdef __linux
-        proc->startDetached("electrum");
+        QString elect = "electrum \"bitcoin:1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu?amount=0.005\"";
+        proc->startDetached(elect);
     #elif _WIN32
-        proc->startDetached("electrum.exe");
+        QString elect = "electrum.exe \"bitcoin:1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu?amount=0.005\"";
+        proc->startDetached(elect);
     #endif
 }
 
@@ -173,7 +175,7 @@ void BidPage::RPC()
     // check there's something to work with
     if (ui->lineEditPassphrase->text() == "" || ui->lineEditPrivkey->text() == "") 
     {
-        ui->lineEditPrivkey->setText("ENTER YOUR WALLET PASSPHRASE AND THE PRIVKEY OF THE BTC ADDRESS YOU BID FROM");
+        QMessageBox::information(0, QString("Attention!"), QString("Please enter your wallet passphrase and the private key of the Bitcoin address you sent your bid from."), QMessageBox::Ok);
         return;
     }
   

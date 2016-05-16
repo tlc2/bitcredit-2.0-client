@@ -856,14 +856,16 @@ void BitcreditGUI::gotoOverviewPage()
 
 void BitcreditGUI::gotoHistoryPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-history');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-history');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-history');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoHistoryPage();
     bover->show();
 }
 
 void BitcreditGUI::gotoReceiveCoinsPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-receive');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-receive');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-receive');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoReceiveCoinsPage();
     bover->show();
     brectab->setChecked(true);
@@ -872,7 +874,8 @@ void BitcreditGUI::gotoReceiveCoinsPage()
 
 void BitcreditGUI::gotoSendCoinsPage(QString addr)
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-send');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-send');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-send');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoSendCoinsPage(addr);
     bover->show();
     sendrec->show();
@@ -882,14 +885,16 @@ void BitcreditGUI::gotoSendCoinsPage(QString addr)
 
 void BitcreditGUI::gotoBidPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-bid');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-bid');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-bid');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoBidPage();
     bover->show();
 }
 
 void BitcreditGUI::gotoP2PPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-p2p');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoP2PPage();
     p2p->show();
     bover->show();
@@ -899,7 +904,8 @@ void BitcreditGUI::gotoP2PPage()
 
 void BitcreditGUI::gotoP2PLPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-p2p');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-p2p');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoP2PLPage();
     p2p->show();
     bover->show();
@@ -909,14 +915,16 @@ void BitcreditGUI::gotoP2PLPage()
 
 void BitcreditGUI::gotoAssetsPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-assets');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-assets');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-assets');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoAssetsPage();
     bover->show();
 }
 
 void BitcreditGUI::gotoUtilitiesPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-finstats');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-finstats');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-finstats');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoUtilitiesPage();
     bover->show();
     uands->show();
@@ -928,7 +936,8 @@ void BitcreditGUI::gotoUtilitiesPage()
 
 void BitcreditGUI::gotoBlockExplorerPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-explorer');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-explorer');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-explorer');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoBlockExplorerPage();
     bover->show();
     uands->show();
@@ -940,7 +949,8 @@ void BitcreditGUI::gotoBlockExplorerPage()
 
 void BitcreditGUI::gotoExchangeBrowserPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-market');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-market');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-market');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoExchangeBrowserPage();
     bover->show();
     uands->show();
@@ -952,7 +962,8 @@ void BitcreditGUI::gotoExchangeBrowserPage()
 
 void BitcreditGUI::gotoOtherPage()
 {
-    Logo->setStyleSheet("background-image: url(':css/logo-other');");
+    //Logo->setStyleSheet("background-image: url(':css/logo-other');");
+    Logo->setStyleSheet("QPushButton{background-image: url(':css/logo-other');}" "QPushButton:hover{background-image: url(':css/logo');}");
     if (walletFrame) walletFrame->gotoOtherPage();
     bover->show();
     uands->show();

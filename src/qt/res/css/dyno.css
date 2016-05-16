@@ -31,7 +31,9 @@ border: none;
 }
 #Logo:hover
 {
-background-color: #232323;
+/*background-color: #323232;*/
+/*background-color: QLinearGradient(x1:0, y1:0, x2:1, y2:0, stop:0 #323232, stop:0.4 #323232, stop:0.9 #323232, stop:0.95 #232323);*/
+background-image: url(':css/logo');
 }
 
 #bframe
@@ -581,6 +583,11 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
 background: none;
 }
 
+QAbstractSpinBox
+{
+background: white;
+color: black;
+}
 
 
 
