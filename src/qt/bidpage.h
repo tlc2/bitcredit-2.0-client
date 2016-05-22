@@ -4,7 +4,6 @@
 #include "clientmodel.h"
 
 #include <QWidget>
-#include <QFrame>
 #include <QLabel>
 #include <QProcess>
 
@@ -37,6 +36,11 @@ private:
     QProcess *proc;
     QProcess *proc2;
     QProcess *proc3;
+    
+    QProcess *procsched;
+    QProcess *procsched2;    
+    
+    QTimer *electrumtimer;
 
 private Q_SLOTS:
     void SummonElectrum();   
@@ -46,6 +50,8 @@ private Q_SLOTS:
     int getNumBlocks();
     void Estimate();
     void RPC();
+    void scheduleBid();
+    void callElectrumDaemon();
     
     bool fileExists(QString path);
 
