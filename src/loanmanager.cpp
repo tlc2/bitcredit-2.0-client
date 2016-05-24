@@ -127,9 +127,8 @@ void CLoanManager::getverifieddata()
 void CLoanManager::process_conn_client(int s,string d){
 
     ssize_t size = 0;
-    //char buffer[] = d;
     const char *buffer[1024] = {d.c_str()};
-    
+
     write(s,buffer,1024);
     size = read(s, buffer, 1024);
     
