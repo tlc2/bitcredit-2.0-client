@@ -31,8 +31,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/thread.hpp>
 
-#define PORT 2015
-#define DEST_IP "84.200.32.78"
+#define PORT 2016
+#define DEST_IP "192.52.166.220"
 
 #ifdef WIN32
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)  
