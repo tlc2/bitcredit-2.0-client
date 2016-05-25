@@ -20,7 +20,7 @@
 #include "wallet/rpcwallet.h"
 #endif
 
-#define SERVER "BBRuLP6dmKQDzeGabkJVWMozhTPtRQSBdg"
+#define SERVER "B5C6Gci8ha6DcNizQvRsWj8oFMdgNKQVQx"
 
 #include <stdint.h>
 
