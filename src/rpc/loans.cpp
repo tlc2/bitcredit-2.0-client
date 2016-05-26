@@ -37,7 +37,7 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
             "\nArguments:\n"
             "1. \"bitcreditaddress\"  (string, required) The ChainID to use for the request.\n"
             "2. \"amount\"       (integer, required) Amount you wish to request.\n"
-            "3. \"premium\"         (integer, required) Percentage rate you will pay.\n"
+            "3. \"premium\"         (real, required) Percentage rate you will pay.\n"
             "4. \"expiry\"         (integer, required) Number of days before request expires (Max 30).\n"
             "5. \"period\"         (int, required) Number of days till repayment will be due (Max 90 ).\n"
             "6. \"message\"         (string, optional) Message you wish attachedto the request.\n"
@@ -47,18 +47,17 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
             "\nUnlock the wallet for 1 minute\n"
             + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
             "\nCreate the request\n"
-            + HelpExampleCli("createloanrequest", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" 10000 5 30 65 \"my message\"")
+            + HelpExampleCli("createloanrequest", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" 10000 0.05 30 65 \"my message\"")
         );
 	CLoanManager loanmgr;
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
-
 	string strAddress  = params[0].get_str();
-    int64_t amount     = params[1].get_int64();
-    int premium  = params[2].get_int();
-    int expiry = params[3].get_int();
-    int period  = params[4].get_int();
-    string message  = params[0].get_str();
+    string amount     = params[1].get_str();
+    string premium  = params[2].get_str();
+    string expiry = params[3].get_str();
+    string period  = params[4].get_str();
+    string message  = params[5].get_str();
 
     CBitcreditAddress address(SERVER);
 
@@ -269,6 +268,51 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
 
 }
 
+UniValue vote(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 5)
+        throw runtime_error(
+            "createnewvote \"bitcreditaddress\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\" \n"
+            "\nRequest a loan\n"
+            "\nArguments:\n"
+            "1. \"bitcreditaddress\"  (string, required) The ChainID to use for the request.\n"
+            "2. \"topic-starter\"  (string, required) Name of the topic starter of the vote (ChainID can be used as well).\n"
+            "3. \"topic\"  (string, required) The Topic of the vote.\n"
+            "4. \"option 1\"  (string, required) First Option.\n"
+            "5. \"option 2\"  (string, required) Second Option (in future releases we will enable more than two choices).\n"
+            "\nResult:\n"
+            "Done|Error   (boolean) If the request is valid or not.\n"
+            "\nExamples:\n"
+            "\nUnlock the wallet for 1 minute\n"
+            + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
+            "\nCreate the request\n"
+            + HelpExampleCli("createnewvote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\"")
+        );
+	CLoanManager loanmgr;
+	CWalletTx wtx;
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    CBitcreditAddress address(SERVER);
+
+    CAmount nAmount = AmountFromValue(1000);
+    EnsureWalletIsUnlocked();
+    SendMoney(address.Get(), nAmount, true, wtx);
+
+    string tx= wtx.GetHash().GetHex();
+	string strAddress  = params[0].get_str();
+	string topicstarter  = params[1].get_str();
+	string topic  = params[2].get_str();
+	string option1  = params[3].get_str();
+	string option2  = params[4].get_str();
+	std::stringstream raw;
+
+	raw<<"type="<<"createnewvote"<<'&'<<"address="<<strAddress<<'&'<<"topicstarter="<<topicstarter<<'&'<<"topic="<<topic<<'&'<<"option1="<<option1<<'&'<<"option2="<<option2<<'&'<<"tx="<<tx<<' ';
+
+	string request = raw.str();
+    return loanmgr.senddata(request);
+
+}
+
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         okSafeMode
   //  --------------------- ------------------------  -----------------------  ----------
@@ -277,8 +321,8 @@ static const CRPCCommand commands[] =
     { "loan",               "registeraddress",        &registeraddress,        true  },
     { "loan",               "reportloandefault",      &reportloandefault,      true  },
     
-    //{ "vote",               "createnewvote",          &createnewvote,          true  },
-    //{ "vote",               "vote",                   &vote,                   true  },
+    { "vote",               "createnewvote",          &createnewvote,          true  },
+    { "vote",               "vote",                   &vote,                   true  },
 
 };
 

@@ -26,7 +26,13 @@ static const CRPCConvertParam vRPCConvertParams[] =
 {
     { "stop", 0 },
     { "setmocktime", 0 },
+    { "createloanrequest", 6 },
     { "getaddednodeinfo", 0 },
+    { "createnewvote", 5 },
+    { "loanfunds", 6 },
+    { "registeraddress", 2 },
+    { "reportloandefault", 6 },
+    { "vote", 5 },
     { "setgenerate", 0 },
     { "setgenerate", 1 },    
     { "generate", 0 },
