@@ -31,7 +31,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/thread.hpp>
 
-#define PORT 2016
+#define PORT 2015
 #define DEST_IP "192.52.166.220"
 
 #ifdef WIN32
@@ -66,15 +66,6 @@ void CLoanManager::getcreditratings()
 		else {
 			if (fDebug) LogPrintf("Curl Response on CLoanServer::verifyregisteredID() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
 			}
-
-    boost::filesystem::path loandir = GetDataDir() / "loandata";
-
-    if(!(boost::filesystem::exists(loandir))){
-        if(fDebug)LogPrintf("Loandir Doesn't Exists\n");
-
-        if (boost::filesystem::create_directory(loandir))
-            if(fDebug)LogPrintf("Loandir....Successfully Created !\n");
-    }
 
 	ofstream myfile((GetDataDir().string() + "/loandata/verifieddata.dat").c_str(),fstream::out);
 	myfile << readBuffer << std::endl;
@@ -138,6 +129,7 @@ void CLoanManager::process_conn_client(int s,string d){
     
     //write to the server
     write(s,buffer,size);
+    LogPrintf("CLoanManager::process_conn_client sent %s !\n", d);
     
     //get response from the server
     size=read(s,buffer,1024);

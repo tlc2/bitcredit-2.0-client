@@ -1165,7 +1165,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // ********************************************************* Step 7: load block chain
-    boost::filesystem::path rawdata = GetDataDir() / "ratings", biddir = GetDataDir() / "bidtracker", trustdb = GetDataDir() / "ratings/rawdata.db";
+    boost::filesystem::path rawdata = GetDataDir() / "ratings", biddir = GetDataDir() / "bidtracker", trustdb = GetDataDir() / "ratings/rawdata.db", loandir = GetDataDir() / "loanmaster", loandir2 = GetDataDir() / "loandata";
 
     if(!(boost::filesystem::exists(rawdata)))
         boost::filesystem::create_directory(rawdata);
@@ -1177,6 +1177,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     if(!(boost::filesystem::exists(biddir)))
         boost::filesystem::create_directory(biddir);
+
+    if(!(boost::filesystem::exists(loandir)))
+        boost::filesystem::create_directory(loandir);
+
+    if(!(boost::filesystem::exists(loandir2)))
+        boost::filesystem::create_directory(loandir2);
 
     fReindex = GetBoolArg("-reindex", false);
 	if (fReindex){
