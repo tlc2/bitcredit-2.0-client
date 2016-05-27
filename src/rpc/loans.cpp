@@ -61,7 +61,7 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
     CBitcreditAddress address(SERVER);
 
     // Fee Amount
-    CAmount nAmount = AmountFromValue(1000);
+    CAmount nAmount = AmountFromValue(100);
 
     EnsureWalletIsUnlocked();
 
@@ -159,7 +159,7 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
     CBitcreditAddress address(SERVER);
 
     // Fee Amount
-    CAmount nAmount = AmountFromValue(1000);
+    CAmount nAmount = AmountFromValue(100);
 
     EnsureWalletIsUnlocked();
 
@@ -206,7 +206,7 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 
     CBitcreditAddress address(SERVER);
 
-    CAmount nAmount = AmountFromValue(5000);
+    CAmount nAmount = AmountFromValue(1000);
     EnsureWalletIsUnlocked();
     SendMoney(address.Get(), nAmount, true, wtx);
 
@@ -291,7 +291,7 @@ UniValue vote(const UniValue& params, bool fHelp)
 
     CBitcreditAddress address(SERVER);
 
-    CAmount nAmount = AmountFromValue(1000);
+    CAmount nAmount = AmountFromValue(100);
     EnsureWalletIsUnlocked();
     SendMoney(address.Get(), nAmount, true, wtx);
 

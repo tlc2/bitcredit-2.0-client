@@ -100,15 +100,6 @@ void CLoanManager::getverifieddata()
 			if (fDebug) LogPrintf("Curl Response on CLoanServer::getverifieddata() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
 			}
 
-    boost::filesystem::path loandir = GetDataDir() / "loandata";
-
-    if(!(boost::filesystem::exists(loandir))){
-        if(fDebug)LogPrintf("Loandir Doesn't Exists\n");
-
-        if (boost::filesystem::create_directory(loandir))
-            if(fDebug)LogPrintf("Loandir....Successfully Created !\n");
-    }
-
 	ofstream myfile((GetDataDir().string() + "/loandata/verifieddata.dat").c_str(),fstream::out);
 	myfile << readBuffer << std::endl;
 	myfile.close();
@@ -122,6 +113,8 @@ void CLoanManager::process_conn_client(int s,string d){
 
     write(s,buffer,1024);
     size = read(s, buffer, 1024);
+
+    LogPrintf("CLoanManager::process_conn_client request is %s  and size is %d bytes!\n",d , d.size());
     
     if(size == 0){
 		LogPrintf("CLoanManager::process_conn_client empty string??  !\n");
