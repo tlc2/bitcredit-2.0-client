@@ -32,7 +32,7 @@
 #include <boost/thread.hpp>
 
 #define PORT 2015
-#define DEST_IP "84.200.32.78"
+#define DEST_IP "192.52.166.220"
 
 #ifdef WIN32
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)  
@@ -67,15 +67,6 @@ void CLoanManager::getcreditratings()
 			if (fDebug) LogPrintf("Curl Response on CLoanServer::verifyregisteredID() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
 			}
 
-    boost::filesystem::path loandir = GetDataDir() / "loandata";
-
-    if(!(boost::filesystem::exists(loandir))){
-        if(fDebug)LogPrintf("Loandir Doesn't Exists\n");
-
-        if (boost::filesystem::create_directory(loandir))
-            if(fDebug)LogPrintf("Loandir....Successfully Created !\n");
-    }
-
 	ofstream myfile((GetDataDir().string() + "/loandata/verifieddata.dat").c_str(),fstream::out);
 	myfile << readBuffer << std::endl;
 	myfile.close();
@@ -109,15 +100,6 @@ void CLoanManager::getverifieddata()
 			if (fDebug) LogPrintf("Curl Response on CLoanServer::getverifieddata() - Lenght %lu - Buffer - %s .\n", (long)readBuffer.size(), readBuffer);
 			}
 
-    boost::filesystem::path loandir = GetDataDir() / "loandata";
-
-    if(!(boost::filesystem::exists(loandir))){
-        if(fDebug)LogPrintf("Loandir Doesn't Exists\n");
-
-        if (boost::filesystem::create_directory(loandir))
-            if(fDebug)LogPrintf("Loandir....Successfully Created !\n");
-    }
-
 	ofstream myfile((GetDataDir().string() + "/loandata/verifieddata.dat").c_str(),fstream::out);
 	myfile << readBuffer << std::endl;
 	myfile.close();
@@ -127,18 +109,20 @@ void CLoanManager::getverifieddata()
 void CLoanManager::process_conn_client(int s,string d){
 
     ssize_t size = 0;
-    //char buffer[] = d;
     const char *buffer[1024] = {d.c_str()};
-    
+
     write(s,buffer,1024);
     size = read(s, buffer, 1024);
+
+    LogPrintf("CLoanManager::process_conn_client request is %s  and size is %d bytes!\n",d , d.size());
     
-    if(size = 0){
+    if(size == 0){
 		LogPrintf("CLoanManager::process_conn_client empty string??  !\n");
     }
     
     //write to the server
     write(s,buffer,size);
+    LogPrintf("CLoanManager::process_conn_client sent %s !\n", d);
     
     //get response from the server
     size=read(s,buffer,1024);

@@ -109,12 +109,12 @@ public:
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 12 * 60; // 12 minutes
-        consensus.nPowTargetSpacing = 3 * 60;
+        consensus.nPowTargetTimespan = 20 * 60; // 12 minutes
+        consensus.nPowTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1916; // 95% of 2016
-        consensus.nMinerConfirmationWindow = 4; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 20; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
@@ -136,13 +136,14 @@ public:
         nDefaultPort = 2017;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1459076565, 202, 0x2000ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1464099160, 85, 0x2000ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         //MineNewGenesisBlock();
-        assert(consensus.hashGenesisBlock == uint256S("0x00f81b193ce2782a5662fa26a7ed1456bfaf59f49b79471c0264b0b11db5fc99"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00a094a2ba5fbf335cae6e881804d04a2726cdc21b045f75388c80f80ca82997"));
         assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
 
-        vSeeds.push_back(CDNSSeedData("bcr-e.com", "bcr-e.com")); // base server
+        vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base server
+        vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,25);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,13);
@@ -214,7 +215,8 @@ public:
 
         vFixedSeeds.clear();
         vSeeds.clear();
-        vSeeds.push_back(CDNSSeedData("bcr-e.com", "bcr-e.com"));
+        vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base server
+        vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);

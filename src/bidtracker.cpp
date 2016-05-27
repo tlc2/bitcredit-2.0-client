@@ -155,7 +155,7 @@ void Bidtracker::btcsortunspent(){
 		if (fDebug) LogPrintf("Bidtracker Unknown Error on Bidtracker::btcsortunspent().\n");
     }
 }
-
+/*
 void Bidtracker::btcsortunspentbackup(){
 
 	std::ifstream myfile ((GetDataDir()/ "bidtracker/btcunspentrawbackup.dat").string().c_str());
@@ -274,7 +274,7 @@ void Bidtracker::btcgetunspentbackup()
 		if (fDebug) LogPrintf("Bidtracker Unknown Error on Bidtracker::btcgetunspentbackup().\n");
     }
 }
-
+*/
 void Bidtracker::btcgetunspent()
 {
     std::string address = "1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu";
@@ -426,7 +426,7 @@ void Bidtracker::combine()
 	std::ofstream myfile;
 	myfile.open((GetDataDir() /"bidtracker/prefinal.dat").string().c_str(),fstream::out);
 	std::ifstream myfile2((GetDataDir() /"bidtracker/btcbids.dat").string().c_str());
-	std::ifstream myfile3((GetDataDir() /"bidtracker/btcbidsbackup.dat").string().c_str());
+	//std::ifstream myfile3((GetDataDir() /"bidtracker/btcbidsbackup.dat").string().c_str());
 
 
 	if (myfile2.is_open()){
@@ -435,20 +435,20 @@ void Bidtracker::combine()
 			getline (myfile2,line);
 	myfile<<line<<std::endl;
 	}	}
-	if (myfile3.is_open()){
+	/*if (myfile3.is_open()){
 		std::string line;
 		while ( myfile3.good() ){
 			getline (myfile3,line);
 	myfile<<line<<std::endl;
-	}	}
+	}	}*/
 
 	myfile.close();
 	myfile2.close();
-	myfile3.close();
+	//myfile3.close();
 	remove((GetDataDir() /"bidtracker/btcbids.dat").string().c_str());
-	remove((GetDataDir() /"bidtracker/btcbidsbackup.dat").string().c_str());
+	//remove((GetDataDir() /"bidtracker/btcbidsbackup.dat").string().c_str());
 	remove((GetDataDir() /"bidtracker/btcunspentraw.dat").string().c_str());
-	remove((GetDataDir() /"bidtracker/btcunspentrawbackup.dat").string().c_str());
+	//remove((GetDataDir() /"bidtracker/btcunspentrawbackup.dat").string().c_str());
 }
 
 int totalbid;
@@ -501,9 +501,9 @@ void getbids(){
 	int64_t nStart = GetTimeMillis();
 	Bidtracker h;
 	h.btcgetunspent();
-	h.btcgetunspentbackup();
+	//h.btcgetunspentbackup();
 	h.btcsortunspent();
-	h.btcsortunspentbackup();
+	//h.btcsortunspentbackup();
 	h.combine();
 	sortbidtracker();
 	if(fDebug)LogPrintf("Bids dump finished  %dms\n", GetTimeMillis() - nStart);

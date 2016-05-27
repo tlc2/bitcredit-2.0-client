@@ -2011,8 +2011,8 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     scheduler.scheduleEvery(&DumpData, DUMP_ADDRESSES_INTERVAL);
 
     // Update Bids 
-    //threadGroup.create_thread(boost::bind(&LoopForever<void (*)()>, "updatebids", &getbids, UPDATE_BID_INTERVAL * 1000));
-	scheduler.scheduleEvery(&getbids, UPDATE_BID_INTERVAL *1000);
+    threadGroup.create_thread(boost::bind(&LoopForever<void (*)()>, "updatebids", &getbids, UPDATE_BID_INTERVAL * 1000));
+
 }
 
 bool StopNode()
