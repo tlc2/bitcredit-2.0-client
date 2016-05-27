@@ -132,7 +132,7 @@ void CLoanManager::process_conn_client(int s,string d){
     write(s,buffer,1024);
     size = read(s, buffer, 1024);
     
-    if(size = 0){
+    if(size == 0){
 		LogPrintf("CLoanManager::process_conn_client empty string??  !\n");
     }
     

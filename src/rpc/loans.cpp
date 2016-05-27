@@ -53,12 +53,11 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
 	string strAddress  = params[0].get_str();
-    string amount     = params[1].get_str();
-    string premium  = params[2].get_str();
-    string expiry = params[3].get_str();
-    string period  = params[4].get_str();
+    int64_t amount     = params[1].get_int64();
+    int premium  = params[2].get_real();
+    int expiry = params[3].get_int();
+    int period  = params[4].get_int();
     string message  = params[5].get_str();
-
     CBitcreditAddress address(SERVER);
 
     // Fee Amount
@@ -270,23 +269,21 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
 
 UniValue vote(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() != 5)
+    if (fHelp || params.size() != 3)
         throw runtime_error(
-            "createnewvote \"bitcreditaddress\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\" \n"
+            "vote \"bitcreditaddress\" \"topic\" \"option num\" \n"
             "\nRequest a loan\n"
             "\nArguments:\n"
-            "1. \"bitcreditaddress\"  (string, required) The ChainID to use for the request.\n"
-            "2. \"topic-starter\"  (string, required) Name of the topic starter of the vote (ChainID can be used as well).\n"
-            "3. \"topic\"  (string, required) The Topic of the vote.\n"
-            "4. \"option 1\"  (string, required) First Option.\n"
-            "5. \"option 2\"  (string, required) Second Option (in future releases we will enable more than two choices).\n"
+            "1. \"bitcreditaddress\"  (string, required) The ChainID to use for the vote.\n"
+            "2. \"topic\"  (string, required) The Topic of the vote.\n"
+            "3. \"option num\"  (string, required) chosen option.\n"
             "\nResult:\n"
             "Done|Error   (boolean) If the request is valid or not.\n"
             "\nExamples:\n"
             "\nUnlock the wallet for 1 minute\n"
             + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
             "\nCreate the request\n"
-            + HelpExampleCli("createnewvote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\"")
+            + HelpExampleCli("vote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic\" \"option num\" ")
         );
 	CLoanManager loanmgr;
 	CWalletTx wtx;
@@ -300,13 +297,11 @@ UniValue vote(const UniValue& params, bool fHelp)
 
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
-	string topicstarter  = params[1].get_str();
-	string topic  = params[2].get_str();
-	string option1  = params[3].get_str();
-	string option2  = params[4].get_str();
+	string topic  = params[1].get_str();
+	int option  = params[2].get_int();
 	std::stringstream raw;
 
-	raw<<"type="<<"createnewvote"<<'&'<<"address="<<strAddress<<'&'<<"topicstarter="<<topicstarter<<'&'<<"topic="<<topic<<'&'<<"option1="<<option1<<'&'<<"option2="<<option2<<'&'<<"tx="<<tx<<' ';
+	raw<<"type="<<"vote"<<'&'<<"address="<<strAddress<<'&'<<"topic="<<topic<<'&'<<"option="<<option<<'&'<<"tx="<<tx<<' ';
 
 	string request = raw.str();
     return loanmgr.senddata(request);

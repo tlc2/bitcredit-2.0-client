@@ -105,7 +105,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 	if (bidtracker.size()>0){
 		int i = 2;
 		for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
-			CBitcreditAddress address(convertAddress(balit->first.c_str(),0x0c));
+			CBitcreditAddress address(convertAddress(balit->first.c_str(),0x19));
 			CTxDestination dest = address.Get();
 			txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
 			bidstotal+=balit->second;
@@ -472,7 +472,7 @@ void static BitcreditMiner(const CChainParams& chainparams)
             unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
             CBlockIndex* pindexPrev = chainActive.Tip();
 
-            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams, coinbaseScript->reserveScript));
             if (!pblocktemplate.get())
             {
                 LogPrintf("Error in BitcreditMiner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");

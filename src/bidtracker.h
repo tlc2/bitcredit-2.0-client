@@ -23,9 +23,9 @@ public:
       CURLcode res;
     CURL *curl;
 	void btcgetunspent();
-	void btcgetunspentbackup();
+	//void btcgetunspentbackup();
 	void btcsortunspent();
-	void btcsortunspentbackup();
+	//void btcsortunspentbackup();
     double getbalance(std::string url);
 	double usdbtc();
 	long double bcrbtc();
