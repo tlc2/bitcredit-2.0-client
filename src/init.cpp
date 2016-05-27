@@ -19,7 +19,6 @@
 #include "httpserver.h"
 #include "httprpc.h"
 #include "key.h"
-#include "loanserver.h"
 #include "main.h"
 #include "miner.h"
 #include "net.h"
