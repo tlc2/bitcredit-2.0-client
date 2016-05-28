@@ -106,7 +106,7 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="le_address_2">
+     <widget class="QLineEdit" name="le_address">
       <property name="minimumSize">
        <size>
         <width>400</width>
@@ -229,7 +229,7 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="le_amount_2">
+     <widget class="QLineEdit" name="le_amount">
       <property name="minimumSize">
        <size>
         <width>150</width>
@@ -245,7 +245,7 @@
      </widget>
     </item>
     <item row="4" column="1">
-     <widget class="QComboBox" name="cb_expiry_2">
+     <widget class="QComboBox" name="cb_period">
       <property name="maximumSize">
        <size>
         <width>150</width>
@@ -310,7 +310,7 @@
      </widget>
     </item>
     <item row="5" column="1">
-     <widget class="QTextEdit" name="textEdit">
+     <widget class="QTextEdit" name="te_message">
       <property name="minimumSize">
        <size>
         <width>400</width>

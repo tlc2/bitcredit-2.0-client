@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QFrame>
 #include <QLabel>
+#include <QProcess>
 
 namespace Ui
 {
@@ -25,6 +26,14 @@ public:
 private:
     Ui::P2PPage *ui;
     ClientModel *clientModel;
+
+    QProcess *proc1;
+
+
+private Q_SLOTS:
+    void SubmitLoanRequest();
+    bool fileExists(QString path);
+    QString pathAppend(const QString& path1, const QString& path2);
 
 };
 

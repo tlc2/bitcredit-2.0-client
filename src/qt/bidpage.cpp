@@ -207,7 +207,8 @@ void BidPage::RPC()
 
    if (!fileExists(clipath) || !fileExists(confpath))
     {
-        QMessageBox::information(0, QString("Attention!"), QString("Please make sure that bitcredit-cli(.exe) exists in the same directory as the currently loaded wallet.\n\nYou must also have a bitcredit.conf file present, containing the following:\n\nrpcuser=blah\nrpcpassword=blahblah\nrpcallowip=127.0.0.1\nserver=1\n\nOnce these are in place, please restart bitcredit-qt to proceed."), QMessageBox::Ok); 
+        QMessageBox::information(0, QString("Attention!"), QString("Please make sure that bitcredit-cli(.exe) exists in the same directory as the currently loaded wallet.\n\nYou must also have a bitcredit.conf file present, containing the following:\n\nrpcuser=blah\nrpcpassword=blahblah\nrpcallowip=127.0.0.1\nserver=1\n\nOnce these are in place, please restart bitcredit-qt to proceed."), QMessageBox::Ok);
+        return; 
     }
 
     // get password
