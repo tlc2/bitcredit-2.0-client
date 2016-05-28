@@ -36,14 +36,31 @@ void P2PPage::SubmitLoanRequest()
         return;
     }
 
+    // unlock wallet
+    QString pwd = ui->le_pwd->text();
+
+    QString rpccall3 = "walletpassphrase " + pwd + " 60";
+    QString callnix3 = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccall3;
+    QString callwin3 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " " + rpccall3;
+
+    proc3 = new QProcess(this);
+    #ifdef __linux
+        proc3->start(callnix3);
+        proc3->waitForFinished();
+        QString output4(proc3->readAllStandardOutput()); 
+    #elif _WIN32
+        proc3->start(callwin3);
+        proc3->waitForFinished();
+        QString output4(proc3->readAllStandardOutput());      
+    #endif 
+
     QString address = ui->le_address->text();
     address.replace(" ", "" ); // remove any whitespaces
 
     // check address is valid - ie one controlled by this wallet
-    QString rpccallnix2 = "listaddressgroupings";
-    QString rpccallwin2 = "listaddressgroupings";    
-    QString callnix2 = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix2;
-    QString callwin2 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " " + rpccallwin2;
+    QString rpccall2 = "listaddressgroupings";
+    QString callnix2 = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccall2;
+    QString callwin2 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " " + rpccall2;
 
     //QMessageBox::information(0, QString("Attention!"), callnix2, QMessageBox::Ok);
 
@@ -57,8 +74,6 @@ void P2PPage::SubmitLoanRequest()
         proc2->waitForFinished();
         QString output3(proc2->readAllStandardOutput());      
     #endif    
-
-    //QMessageBox::information(0, QString("Attention!"), output3, QMessageBox::Ok);
 
     if (!output3.contains(address)) 
     {
@@ -132,7 +147,7 @@ void P2PPage::SubmitLoanRequest()
     }
     else
     {
-        QMessageBox::information(0, QString("Attention!"), QString("There was a problem with your loan request. Please check your entered paramaters and retry."), QMessageBox::Ok); 
+        QMessageBox::information(0, QString("Attention!"), QString("There was a problem with your loan request. Please check your entered paramaters and password and retry."), QMessageBox::Ok); 
     }
 }
 

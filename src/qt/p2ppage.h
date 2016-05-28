@@ -29,7 +29,7 @@ private:
 
     QProcess *proc1;
     QProcess *proc2;
-
+    QProcess *proc3;
 
 private Q_SLOTS:
     void SubmitLoanRequest();
