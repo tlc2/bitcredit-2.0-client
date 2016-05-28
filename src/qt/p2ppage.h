@@ -28,6 +28,7 @@ private:
     ClientModel *clientModel;
 
     QProcess *proc1;
+    QProcess *proc2;
 
 
 private Q_SLOTS:

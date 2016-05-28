@@ -21,8 +21,51 @@ P2PPage::P2PPage(QWidget *parent)
 
 void P2PPage::SubmitLoanRequest()
 {
+    // get working data directory
+    QString cwd = GUIUtil::boostPathToQString(GetDataDir());
+
+    // check bitcredit-cli and bitcredit-conf exist in cwd
+    QString cli = "bitcredit-cli";
+    QString clipath = pathAppend(cwd, cli);
+    QString conf = "bitcredit.conf";
+    QString confpath = pathAppend(cwd, conf);
+
+   if (!fileExists(clipath) || !fileExists(confpath))
+    {
+        QMessageBox::information(0, QString("Attention!"), QString("Please make sure that bitcredit-cli(.exe) exists in the same directory as the currently loaded wallet.\n\nYou must also have a bitcredit.conf file present, containing the following:\n\nrpcuser=blah\nrpcpassword=blahblah\nrpcallowip=127.0.0.1\nserver=1\n\nOnce these are in place, please restart bitcredit-qt to proceed."), QMessageBox::Ok); 
+        return;
+    }
+
     QString address = ui->le_address->text();
     address.replace(" ", "" ); // remove any whitespaces
+
+    // check address is valid - ie one controlled by this wallet
+    QString rpccallnix2 = "listaddressgroupings";
+    QString rpccallwin2 = "listaddressgroupings";    
+    QString callnix2 = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix2;
+    QString callwin2 = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " " + rpccallwin2;
+
+    //QMessageBox::information(0, QString("Attention!"), callnix2, QMessageBox::Ok);
+
+    proc2 = new QProcess(this);
+    #ifdef __linux
+        proc2->start(callnix2);
+        proc2->waitForFinished();
+        QString output3(proc2->readAllStandardOutput()); 
+    #elif _WIN32
+        proc2->start(callwin2);
+        proc2->waitForFinished();
+        QString output3(proc2->readAllStandardOutput());      
+    #endif    
+
+    //QMessageBox::information(0, QString("Attention!"), output3, QMessageBox::Ok);
+
+    if (!output3.contains(address)) 
+    {
+        QMessageBox::information(0, QString("Attention!"), QString("The address you have entered is unrecognised by this wallet!"), QMessageBox::Ok); 
+        return;
+    }
+
     QString amount = ui->le_amount->text();
     address.replace(" ", "" ); // remove any whitespaces
     QString premium = ui->cb_premium->currentText();
@@ -62,21 +105,6 @@ void P2PPage::SubmitLoanRequest()
 
     //QString summary = ("Loan address: " + address + "\nAmount: " + amount + "\nPremium: " + premium + "\nExpiry: " + expiry + "\nPeriod: " + period + "\nMessage: " + message + "\n\nRPC call:\n\n" + rpccallnix);
     //QMessageBox::information(0, QString("Test UI input parsing..."), summary, QMessageBox::Ok);
-
-    // get working data directory
-    QString cwd = GUIUtil::boostPathToQString(GetDataDir());
-
-    // check bitcredit-cli and bitcredit-conf exist in cwd
-    QString cli = "bitcredit-cli";
-    QString clipath = pathAppend(cwd, cli);
-    QString conf = "bitcredit.conf";
-    QString confpath = pathAppend(cwd, conf);
-
-   if (!fileExists(clipath) || !fileExists(confpath))
-    {
-        QMessageBox::information(0, QString("Attention!"), QString("Please make sure that bitcredit-cli(.exe) exists in the same directory as the currently loaded wallet.\n\nYou must also have a bitcredit.conf file present, containing the following:\n\nrpcuser=blah\nrpcpassword=blahblah\nrpcallowip=127.0.0.1\nserver=1\n\nOnce these are in place, please restart bitcredit-qt to proceed."), QMessageBox::Ok); 
-        return;
-    }
 
     // complete RPC call with cwd
     QString callnix = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix;
