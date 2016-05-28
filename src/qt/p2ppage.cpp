@@ -82,7 +82,7 @@ void P2PPage::SubmitLoanRequest()
     QString callnix = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix;
     QString callwin = cwd + "/bitcredit-cli.exe --datadir=" + cwd + " " + rpccallwin;
 
-    QMessageBox::information(0, QString("Info!"), callnix, QMessageBox::Ok);
+    //QMessageBox::information(0, QString("Info!"), callnix, QMessageBox::Ok);
 
     proc1 = new QProcess(this);
     #ifdef __linux
@@ -95,10 +95,9 @@ void P2PPage::SubmitLoanRequest()
         QString output(proc1->readAllStandardOutput());      
     #endif
 
-    QMessageBox::information(0, QString("Info!"), output, QMessageBox::Ok);
+    //QMessageBox::information(0, QString("Info!"), output, QMessageBox::Ok);
 
     // provide feedback on result
-    //if (output=="true") ////////////////////////////                      gah no worky /////////////////////    fIX
     if (output.contains("true")) 
     {
         QMessageBox::information(0, QString("Request submitted!"), QString("Thank you, your loan request has been submitted and the 100 BCR fee deducted from your balance."), QMessageBox::Ok); 
@@ -107,7 +106,6 @@ void P2PPage::SubmitLoanRequest()
     {
         QMessageBox::information(0, QString("Attention!"), QString("There was a problem with your loan request. Please check your entered paramaters and retry."), QMessageBox::Ok); 
     }
-    
 }
 
 bool P2PPage::fileExists(QString path) 
