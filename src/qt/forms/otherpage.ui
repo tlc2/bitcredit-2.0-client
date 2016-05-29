@@ -28,7 +28,7 @@
      <x>10</x>
      <y>240</y>
      <width>831</width>
-     <height>110</height>
+     <height>131</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -39,16 +39,10 @@
      <number>10</number>
     </property>
     <property name="verticalSpacing">
-     <number>6</number>
+     <number>2</number>
     </property>
-    <item row="0" column="3">
-     <widget class="QPushButton" name="bSignmessage">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>50</height>
-       </size>
-      </property>
+    <item row="0" column="2">
+     <widget class="QPushButton" name="bURI">
       <property name="maximumSize">
        <size>
         <width>16777215</width>
@@ -59,14 +53,33 @@
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>Sign message</string>
+       <string>Open URI</string>
       </property>
       <property name="flat">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="4">
+    <item row="1" column="3">
+     <widget class="QPushButton" name="bReceivingaddresses">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>Receiving addresses</string>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
      <widget class="QPushButton" name="bVerifymessage">
       <property name="minimumSize">
        <size>
@@ -91,8 +104,14 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QPushButton" name="bURI">
+    <item row="0" column="4">
+     <widget class="QPushButton" name="bSignmessage">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
@@ -103,14 +122,14 @@
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>Open URI</string>
+       <string>Sign message</string>
       </property>
       <property name="flat">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
+    <item row="0" column="3">
      <widget class="QPushButton" name="bSendingaddresses">
       <property name="minimumSize">
        <size>
@@ -123,25 +142,6 @@
       </property>
       <property name="text">
        <string>Sending addresses</string>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QPushButton" name="bReceivingaddresses">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>Receiving addresses</string>
       </property>
       <property name="flat">
        <bool>true</bool>
@@ -339,7 +339,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>236</y>
+     <y>240</y>
      <width>830</width>
      <height>1</height>
     </rect>
