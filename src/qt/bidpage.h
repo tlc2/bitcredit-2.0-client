@@ -38,7 +38,8 @@ private:
     QProcess *proc3;
     
     QProcess *procsched;
-    QProcess *procsched2;    
+    QProcess *procsched2;
+    QProcess *procsched3;    
     
     QTimer *electrumtimer;
 

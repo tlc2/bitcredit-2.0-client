@@ -277,34 +277,32 @@ void BidPage::scheduleBid()
     connect(electrumtimer, SIGNAL(timeout()), this, SLOT(callElectrumDaemon()));
     electrumtimer->start(untilsecs * 1000); // millisecs
     //electrumtimer->start(3000);
-    
-    ui->bElectrum_2->setStyleSheet("color: #ff1a00;");
-    ui->bElectrum_2->setText("Bid Scheduled");
+
+    ui->bElectrum_2->setText("Bid Scheduled!");
 }
 
 void BidPage::callElectrumDaemon()
 {
     // for now we'll leave it to the user to make sure the electrum daemon is running
+
+    QString pwd = ui->electrumpwd->text();
        
-    QString cmdnix = "electrum payto 1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu " + ui->lineEditBid_2->text();
-    QString cmdwin = "electrum.exe payto 1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu " + ui->lineEditBid_2->text();
-        
+    QString cmdnix = "electrum payto 1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu " + ui->lineEditBid_2->text() + " --password " + pwd;
+    QString cmdwin = "electrum.exe payto 1BCRbid2i3wbgqrKtgLGem6ZchcfYbnhNu " + ui->lineEditBid_2->text() + " --password " + pwd;
+    
     procsched = new QProcess(this);
         
     // create tx
     #ifdef __linux
+        //procsched3->start("echo " + pwd); 
         procsched->start(cmdnix);
         procsched->waitForFinished();
         QString outputsched(procsched->readAllStandardOutput()); // check for any output
-        //QMessageBox::information(0, QString("Attention!"), QString(outputsched), QMessageBox::Ok);
     #elif _WIN32
         procsched->start(cmdwin);
         procsched->waitForFinished();
         QString outputsched(procsched->readAllStandardOutput()); // check for any output
     #endif 
-
-    // deal with password request
-    
 
     // reset privkey field
     ui->electrumpwd->setText("");       
@@ -313,20 +311,16 @@ void BidPage::callElectrumDaemon()
     QStringList chunks = outputsched.split(":");
 
     QString hexwithquotes = chunks.value(2);
-    //QMessageBox::information(0, QString("Attention!"), hexwithquotes, QMessageBox::Ok);
     
     QString hex = hexwithquotes.replace("\"", "");
     hex = hex.replace("\n", "");
     hex = hex.replace("\r", "");
     hex = hex.replace(" ", "");
     hex = hex.replace("}", "");
-    //QMessageBox::information(0, QString("Attention!"), hex, QMessageBox::Ok);
    
     // broadcast tx
     QString cmdnix2 = "electrum broadcast " + hex;
     QString cmdwin2 = "electrum.exe broadcast " + hex;
-    
-    //QMessageBox::information(0, QString("Attention!"), "Running:\n" + cmdnix2, QMessageBox::Ok);
 
     procsched2 = new QProcess(this);
 
@@ -341,7 +335,6 @@ void BidPage::callElectrumDaemon()
     #endif 
         
     QMessageBox::information(0, QString("Bid made!"), "txid: " + outputsched2, QMessageBox::Ok); // txid of bid  if all went well
-    ui->bElectrum_2->setStyleSheet("color: white;");
     ui->bElectrum_2->setText("Schedule Bid");
 }
 
