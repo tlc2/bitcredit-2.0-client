@@ -294,7 +294,6 @@ void BidPage::callElectrumDaemon()
         
     // create tx
     #ifdef __linux
-        //procsched3->start("echo " + pwd); 
         procsched->start(cmdnix);
         procsched->waitForFinished();
         QString outputsched(procsched->readAllStandardOutput()); // check for any output
@@ -309,7 +308,6 @@ void BidPage::callElectrumDaemon()
 
     // extract hex
     QStringList chunks = outputsched.split(":");
-
     QString hexwithquotes = chunks.value(2);
     
     QString hex = hexwithquotes.replace("\"", "");
@@ -333,8 +331,12 @@ void BidPage::callElectrumDaemon()
         procsched2->waitForFinished();
         QString outputsched2(procsched2->readAllStandardOutput()); // check for any output
     #endif 
+
+    // extract txid from output
+    QStringList chunks2 = outputsched2.split("\"");
+    QString txid = chunks2.value(1);
         
-    QMessageBox::information(0, QString("Bid made!"), "txid: " + outputsched2, QMessageBox::Ok); // txid of bid  if all went well
+    QMessageBox::information(0, QString("Bid made!"), "txid: " + txid, QMessageBox::Ok); // txid of bid  if all went well
     ui->bElectrum_2->setText("Schedule Bid");
 }
 
