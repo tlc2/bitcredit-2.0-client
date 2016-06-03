@@ -123,11 +123,13 @@ bool CLoanManager::senddata(string data)
 	}
 
 	// read/write to local socket for communication
-	const char *wbuf[256] = {data.c_str()};
-	int act_wsize = write(sock, wbuf, sizeof(wbuf));
-	LogPrintf("sent: %s ... \n act_wsize = %d \n",wbuf, act_wsize);
+	char wbuf[256];
+	strcpy(wbuf,data.c_str());
+	int act_wsize = write(sock, wbuf, 256);
+	string str(wbuf);
+	LogPrintf("sent: %s ... \n act_wsize = %d \n",str, act_wsize);
 
-	char rbuf[50];
+	char rbuf[75];
 	int act_rsize = read(sock, rbuf, sizeof(rbuf));
 	LogPrintf("received: %s ... \n act_rsize = %d \n",rbuf, act_rsize);
 

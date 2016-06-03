@@ -70,7 +70,7 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
 
     std::stringstream raw;
 
-	raw<<"type="<<"loanrequest"<<'&'<<"address="<<strAddress<<'&'<<"amount="<<amount<<'&'<<"premium="<<premium<<'&'<<"expiry="<<expiry<<'&'<<"period="<<period<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
+	raw<<"loanrequest"<<'&'<<strAddress<<','<<amount<<','<<premium<<','<<expiry<<','<<period<<','<<message<<','<<tx<<endl;
 
 	string request = raw.str();
 
@@ -123,7 +123,7 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
 
 	std::stringstream raw;
 
-	raw<<"type="<<"issueloan"<<'&'<<"address="<<strAddress<<'&'<<"receiver="<<receiver<<'&'<<"reqtx="<<reqtx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"message="<<message<<'&'<<"tx="<<tx<<' ';
+	raw<<"issueloan"<<'&'<<strAddress<<','<<receiver<<','<<reqtx<<','<<amount<<','<<requestid<<','<<message<<','<<tx<<endl;
 
 	string request = raw.str();
 
@@ -176,7 +176,7 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
 
 	std::stringstream raw;
 
-	raw<<"type="<<"reportdefault"<<'&'<<"address="<<strAddress<<'&'<<"defaulter="<<defaulter<<'&'<<"reqtx="<<reqtx<<'&'<<"loantx="<<loantx<<'&'<<"amount="<<amount<<'&'<<"requestid="<<requestid<<'&'<<"tx="<<tx<<' ';
+	raw<<"reportdefault"<<'&'<<strAddress<<','<<defaulter<<','<<reqtx<<','<<loantx<<','<<amount<<','<<requestid<<','<<tx<<endl;
 
 	string request = raw.str();
     return loanmgr.senddata(request);
@@ -215,7 +215,7 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 	string bitcointx  = params[1].get_str();
 	std::stringstream raw;
 
-	raw<<"type="<<"registeraddress"<<'&'<<"address="<<strAddress<<'&'<<"bitcointx="<<bitcointx<<'&'<<"tx="<<tx<<' ';
+	raw<<"registeraddress"<<'&'<<strAddress<<','<<bitcointx<<','<<tx<<endl;
 
 	string request = raw.str();
     return loanmgr.senddata(request);
@@ -260,7 +260,7 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
 	string option2  = params[4].get_str();
 	std::stringstream raw;
 
-	raw<<"type="<<"createnewvote"<<'&'<<"address="<<strAddress<<'&'<<"topicstarter="<<topicstarter<<'&'<<"topic="<<topic<<'&'<<"option1="<<option1<<'&'<<"option2="<<option2<<'&'<<"tx="<<tx<<' ';
+	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<','<<tx<<endl;
 
 	string request = raw.str();
     return loanmgr.senddata(request);
@@ -301,7 +301,7 @@ UniValue vote(const UniValue& params, bool fHelp)
 	int option  = params[2].get_int();
 	std::stringstream raw;
 
-	raw<<"type="<<"vote"<<'&'<<"address="<<strAddress<<'&'<<"topic="<<topic<<'&'<<"option="<<option<<'&'<<"tx="<<tx<<' ';
+	raw<<"vote"<<'&'<<strAddress<<','<<topic<<','<<option<<','<<tx<<endl;
 
 	string request = raw.str();
     return loanmgr.senddata(request);
