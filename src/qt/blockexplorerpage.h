@@ -1,31 +1,45 @@
 #ifndef BLOCKEXPLORERPAGE_H
 #define BLOCKEXPLORERPAGE_H
 
-#include "clientmodel.h"
-
 #include <QWidget>
-#include <QFrame>
-#include <QLabel>
 
-namespace Ui
-{
-    class BlockExplorerPage;
+#include "uint256.h"
+#include "base58.h"
+
+namespace Ui {
+class BlockExplorerPage;
 }
 
-class BlockExplorerPage: public QWidget
+class CBlockIndex;
+class CTransaction;
+
+class BlockExplorerPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    BlockExplorerPage(QWidget *parent = 0);
+    explicit BlockExplorerPage(QWidget *parent = 0);
     ~BlockExplorerPage();
 
-    void setClientModel(ClientModel *model);
+protected:
+    void keyPressEvent(QKeyEvent *event);
+    void showEvent(QShowEvent*);
 
 private:
     Ui::BlockExplorerPage *ui;
-    ClientModel *clientModel;
+    bool m_NeverShown;
+    int m_HistoryIndex;
+    QStringList m_History;
 
+private Q_SLOTS:
+    void onSearch();
+    void goTo(const QString& query);
+    void back();
+    void forward();
+    void setBlock(CBlockIndex* pBlock);
+    bool switchTo(const QString& query);
+    void setContent(const std::string &content);
+    void updateNavButtons();
 
 };
 
