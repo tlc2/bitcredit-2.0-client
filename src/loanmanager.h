@@ -31,7 +31,7 @@ public:
 
     string registerchainid(string address, string bitcointx , string tx);
 
-    string newvote(string address, string topicstarter , string topic, string option1, string option2, string tx);
+    string newvote(string address, string topicstarter , string topic, string option1, string option2, string description, string tx);
 
     string vote(string address, string topic , int option, string tx);
 	

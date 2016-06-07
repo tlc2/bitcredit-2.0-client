@@ -115,7 +115,7 @@ string CLoanManager::loanreq(string address, CAmount amount, double premium, int
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("loanrequest", address, amount, premium, expiry, period, message, tx);
+    node->PushMessage(NetMsgType::LOANREQUEST, address, amount, premium, expiry, period, message, tx);
     return string("Request Sent\n");
 }
 
@@ -128,7 +128,7 @@ string CLoanManager::loan(string address, string receiver , string reqtx, CAmoun
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("issueloan", address, receiver, reqtx, amount, reqid, message, tx);
+    node->PushMessage(NetMsgType::LOAN, address, receiver, reqtx, amount, reqid, message, tx);
     return string("Loan Issued, Server Notified\n");
 }
 
@@ -141,7 +141,7 @@ string CLoanManager::reportdefault(string address, string defaulter , string req
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("reportdefault", address, defaulter, reqtx, loantx, amount, reqid, tx);
+    node->PushMessage(NetMsgType::REPORTDEFAULT, address, defaulter, reqtx, loantx, amount, reqid, tx);
     return string("Default Reported, Server Notified\n");
 }
 
@@ -154,12 +154,12 @@ string CLoanManager::registerchainid(string address, string bitcointx , string t
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("registeraddress", address, bitcointx, tx);
+    node->PushMessage(NetMsgType::REGISTERADDRESS, address, bitcointx, tx);
     
     return string("Address Registered, Server Notified\n");
 }
 
-string CLoanManager::newvote(string address, string topicstarter , string topic, string option1, string option2, string tx) {
+string CLoanManager::newvote(string address, string topicstarter , string topic, string option1, string option2, string description, string tx) {
 
     CAddress destination(CService(DEST_IP,GetListenPort()),0);
     CNode* node = ConnectNode(destination, NULL);
@@ -168,7 +168,7 @@ string CLoanManager::newvote(string address, string topicstarter , string topic,
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("newvote", address, topicstarter, topic, option1, option2, tx);
+    node->PushMessage(NetMsgType::NEWVOTE, address, topicstarter, topic, option1, option2, tx);
     return string("New Vote Submitted, Server Notified\n");
 }
 
@@ -181,7 +181,7 @@ string CLoanManager::vote(string address, string topic , int option, string tx) 
         throw runtime_error("not connected to server");
     }
 
-    node->PushMessage("vote", address, topic, option, tx);
+    node->PushMessage(NetMsgType::VOTE, address, topic, option, tx);
     return string("Vote Submitted, Server Notified\n");
 }
 

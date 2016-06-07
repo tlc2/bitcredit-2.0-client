@@ -201,9 +201,9 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 
 UniValue createnewvote(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() != 5)
+    if (fHelp || params.size() != 6)
         throw runtime_error(
-            "createnewvote \"bitcreditaddress\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\" \n"
+            "createnewvote \"bitcreditaddress\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\" \"description\"\n"
             "\nRequest a loan\n"
             "\nArguments:\n"
             "1. \"bitcreditaddress\"  (string, required) The ChainID to use for the request.\n"
@@ -211,31 +211,33 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
             "3. \"topic\"  (string, required) The Topic of the vote.\n"
             "4. \"option 1\"  (string, required) First Option.\n"
             "5. \"option 2\"  (string, required) Second Option (in future releases we will enable more than two choices).\n"
+            "5. \"description\"  (string, required) Description of voting issues.\n"
             "\nResult:\n"
             "Done|Error   (boolean) If the request is valid or not.\n"
             "\nExamples:\n"
             "\nUnlock the wallet for 1 minute\n"
             + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
             "\nCreate the request\n"
-            + HelpExampleCli("createnewvote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\"")
+            + HelpExampleCli("createnewvote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\" \"description\"")
         );
 
 	CLoanManager loanmgr;
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
     CBitcreditAddress address(SERVER);
-    CAmount nAmount = AmountFromValue(1000);
+    CAmount nAmount = AmountFromValue(100);
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string topicstarter  = params[1].get_str();
 	string topic  = params[2].get_str();
 	string option1  = params[3].get_str();
 	string option2  = params[4].get_str();
+	string description  = params[5].get_str();
 	std::stringstream raw;
-	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<endl;
+	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<','<<description<<endl;
 	string strTxCommand = raw.str();
     SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
-    string ret = loanmgr.newvote(strAddress, topicstarter, topic, option1, option2, tx);
+    string ret = loanmgr.newvote(strAddress, topicstarter, topic, option1, option2, description, tx);
 
     return ret;
 }
