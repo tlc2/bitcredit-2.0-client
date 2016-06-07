@@ -12,7 +12,6 @@
 #include "netbase.h"
 #include "rpc/server.h"
 #include "timedata.h"
-#include "util.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -64,18 +63,14 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
     CAmount nAmount = AmountFromValue(100);
 
     EnsureWalletIsUnlocked();
-
-    SendMoney(address.Get(), nAmount, true, wtx);
-    string tx= wtx.GetHash().GetHex();
-
     std::stringstream raw;
-
-	raw<<"loanrequest"<<'&'<<strAddress<<','<<amount<<','<<premium<<','<<expiry<<','<<period<<','<<message<<','<<tx<<endl;
-
-	string request = raw.str();
-
-    return loanmgr.senddata(request);
-
+	raw<<"loanrequest"<<'&'<<strAddress<<','<<amount<<','<<premium<<','<<expiry<<','<<period<<','<<message<<endl;
+	string strTxCommand = raw.str();
+    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    string tx= wtx.GetHash().GetHex();
+    string ret = loanmgr.loanreq(strAddress, amount, premium, expiry , period, message, tx);
+    
+    return ret;
 }
 
 UniValue loanfunds(const UniValue& params, bool fHelp)
@@ -105,14 +100,6 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
 
     CBitcreditAddress address(params[1].get_str());
     CAmount nAmount = AmountFromValue(params[2]);
-
-    wtx.mapValue["comment"] = params[6].get_str();
-    wtx.mapValue["to"]      = params[1].get_str();
-
-    EnsureWalletIsUnlocked();
-
-    SendMoney(address.Get(), nAmount, false, wtx);
-
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string receiver  = params[1].get_str();
@@ -121,14 +108,14 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
     string requestid  = params[4].get_str();
     string message  = params[5].get_str();
 
+    EnsureWalletIsUnlocked();
 	std::stringstream raw;
-
-	raw<<"issueloan"<<'&'<<strAddress<<','<<receiver<<','<<reqtx<<','<<amount<<','<<requestid<<','<<message<<','<<tx<<endl;
-
-	string request = raw.str();
-
-    return loanmgr.senddata(request);
-
+	raw<<"issueloan"<<'&'<<strAddress<<','<<receiver<<','<<reqtx<<','<<amount<<','<<requestid<<','<<message<<endl;
+	string strTxCommand = raw.str();
+    SendMoney(address.Get(), nAmount, false, wtx, strTxCommand);
+    string ret = loanmgr.loan(strAddress, receiver, reqtx, amount, requestid, message, tx);
+	
+	return  ret;
 }
 
 UniValue reportloandefault(const UniValue& params, bool fHelp)
@@ -155,16 +142,10 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
 	CLoanManager loanmgr;
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
-
     CBitcreditAddress address(SERVER);
-
     // Fee Amount
     CAmount nAmount = AmountFromValue(100);
-
     EnsureWalletIsUnlocked();
-
-    SendMoney(address.Get(), nAmount, true, wtx);
-
     string tx= wtx.GetHash().GetHex();
 
 	string strAddress  = params[0].get_str();
@@ -173,14 +154,13 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
 	string loantx  = params[3].get_str();
     int64_t amount     = params[4].get_int64();
     string requestid  = params[5].get_str();
-
 	std::stringstream raw;
+	raw<<"reportdefault"<<'&'<<strAddress<<','<<defaulter<<','<<reqtx<<','<<loantx<<','<<amount<<','<<requestid<<endl;
+	string strTxCommand = raw.str();
+    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    string ret = loanmgr.reportdefault(strAddress, defaulter, reqtx, loantx, amount, requestid, tx);
 
-	raw<<"reportdefault"<<'&'<<strAddress<<','<<defaulter<<','<<reqtx<<','<<loantx<<','<<amount<<','<<requestid<<','<<tx<<endl;
-
-	string request = raw.str();
-    return loanmgr.senddata(request);
-
+    return ret;
 }
 
 UniValue registeraddress(const UniValue& params, bool fHelp)
@@ -203,23 +183,20 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 	CLoanManager loanmgr;
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
-
     CBitcreditAddress address(SERVER);
-
     CAmount nAmount = AmountFromValue(1000);
     EnsureWalletIsUnlocked();
-    SendMoney(address.Get(), nAmount, true, wtx);
 
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string bitcointx  = params[1].get_str();
 	std::stringstream raw;
-
 	raw<<"registeraddress"<<'&'<<strAddress<<','<<bitcointx<<','<<tx<<endl;
+	string strTxCommand = raw.str();
+    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    string ret = loanmgr.registerchainid(strAddress, bitcointx , tx);
 
-	string request = raw.str();
-    return loanmgr.senddata(request);
-
+    return ret;
 }
 
 UniValue createnewvote(const UniValue& params, bool fHelp)
@@ -242,16 +219,12 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
             "\nCreate the request\n"
             + HelpExampleCli("createnewvote", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XZ\" \"topic-starter\" \"topic\" \"option 1\" \"option 2\"")
         );
+
 	CLoanManager loanmgr;
 	CWalletTx wtx;
     LOCK2(cs_main, pwalletMain->cs_wallet);
-
     CBitcreditAddress address(SERVER);
-
     CAmount nAmount = AmountFromValue(1000);
-    EnsureWalletIsUnlocked();
-    SendMoney(address.Get(), nAmount, true, wtx);
-
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string topicstarter  = params[1].get_str();
@@ -259,12 +232,12 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
 	string option1  = params[3].get_str();
 	string option2  = params[4].get_str();
 	std::stringstream raw;
+	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<endl;
+	string strTxCommand = raw.str();
+    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    string ret = loanmgr.newvote(strAddress, topicstarter, topic, option1, option2, tx);
 
-	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<','<<tx<<endl;
-
-	string request = raw.str();
-    return loanmgr.senddata(request);
-
+    return ret;
 }
 
 UniValue vote(const UniValue& params, bool fHelp)
@@ -293,19 +266,19 @@ UniValue vote(const UniValue& params, bool fHelp)
 
     CAmount nAmount = AmountFromValue(100);
     EnsureWalletIsUnlocked();
-    SendMoney(address.Get(), nAmount, true, wtx);
+
 
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string topic  = params[1].get_str();
 	int option  = params[2].get_int();
 	std::stringstream raw;
-
-	raw<<"vote"<<'&'<<strAddress<<','<<topic<<','<<option<<','<<tx<<endl;
-
-	string request = raw.str();
-    return loanmgr.senddata(request);
-
+	raw<<"vote"<<'&'<<strAddress<<','<<topic<<','<<option<<endl;
+	string strTxCommand = raw.str();	
+    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    string ret = loanmgr.vote(strAddress, topic, option, tx);
+    
+	return ret;
 }
 
 static const CRPCCommand commands[] =

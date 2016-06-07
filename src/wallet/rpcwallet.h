@@ -4,9 +4,10 @@
 
 #ifndef BITCREDIT_WALLET_RPCWALLET_H
 #define BITCREDIT_WALLET_RPCWALLET_H
+#include <string>
 
 class CRPCTable;
 
 void RegisterWalletRPCCommands(CRPCTable &tableRPC);
-extern void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew);
+extern void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew, std::string strTxCommand);
 #endif //BITCREDIT_WALLET_RPCWALLET_H

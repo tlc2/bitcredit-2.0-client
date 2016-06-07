@@ -1101,6 +1101,8 @@ public:
              SerializeOutput(s, nOutput, nType, nVersion);
         // Serialize nLockTime
         ::Serialize(s, txTo.nLockTime, nType, nVersion);
+        // Serialize strTxCommand
+        ::Serialize(s, txTo.strTxCommand, nType, nVersion); 
     }
 };
 

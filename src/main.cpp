@@ -3849,7 +3849,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
         if (nCheckLevel >= 1 && !CheckBlock(block, state))
-            return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__, 
+            return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
         if (nCheckLevel >= 2 && pindex) {
@@ -3940,7 +3940,7 @@ bool LoadBlockIndex()
     return true;
 }
 
-bool InitBlockIndex(const CChainParams& chainparams) 
+bool InitBlockIndex(const CChainParams& chainparams)
 {
     LOCK(cs_main);
 	DEV_SCRIPT << OP_DUP << OP_HASH160 << ParseHex(DEV_ADDRESS) << OP_EQUALVERIFY << OP_CHECKSIG;
@@ -4668,7 +4668,112 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
     }
 
+  /*  else if (strCommand == NetMsgType::REGISTERADDRESS)
+    {
+        string address;
+        string btctx;
+        string tx;
 
+        vRecv >> address;
+        vRecv >> btctx;
+        vRecv >> tx;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }
+
+    else if (strCommand == NetMsgType::LOANREQUEST)
+    {
+        string address;
+        int64_t amount;
+        double premium;
+        int expiry;
+        int period;
+        string tx;
+
+        vRecv >> address;
+        vRecv >> amount;
+        vRecv >> premium;
+        vRecv >> expiry;
+        vRecv >> period;
+        vRecv >> tx;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }
+
+    else if (strCommand == NetMsgType::LOAN)
+    {
+        string address;
+        string reqaddress;
+        string reqtx;
+        int64_t amount;
+        string requestid;
+        string message;
+
+        vRecv >> address;
+        vRecv >> reqaddress;
+        vRecv >> reqtx;
+        vRecv >> amount;
+        vRecv >> requestid;
+        vRecv >> message;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }
+
+    else if (strCommand == NetMsgType::REPORTDEFAULT)
+    {
+        string address;
+        string reqaddress;
+        string reqtx;
+        string loantx;
+        int64_t amount;
+        string requestid;
+        string tx;
+
+        vRecv >> address;
+        vRecv >> reqaddress;
+        vRecv >> reqtx;
+        vRecv >> loantx;
+        vRecv >> amount;
+        vRecv >> requestid;
+        vRecv >> tx;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }
+
+    else if (strCommand == NetMsgType::NEWVOTE)
+    {
+        string address;
+        string topicstarter;
+        string topic;
+        string option1;
+        string option2;
+        string tx;
+
+        vRecv >> address;
+        vRecv >> topicstarter;
+        vRecv >> topic;
+        vRecv >> option1;
+        vRecv >> option2;
+        vRecv >> tx;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }
+ 
+    else if (strCommand == NetMsgType::VOTE)
+    {
+        string address;
+        string topic;
+        int option;
+        string tx;
+
+        vRecv >> address;
+        vRecv >> topic;
+        vRecv >> option;
+        vRecv >> tx;
+
+        pwalletMain->HandleOrder(customer_onion, item, quantity, info);
+    }   */
+    
     else if (strCommand == NetMsgType::ADDR)
     {
         vector<CAddress> vAddr;
