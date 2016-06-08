@@ -21,9 +21,7 @@
 
 extern int callback(void *NotUsed, int argc, char **argv, char **azColName);
 extern std::map<std::string,int64_t> getbalances();
-extern std::map<std::string,double> creditratings();
-extern std::map<std::string,int> banlist();
-extern std::map<std::string,int> verifieddata();
+
 class TrustEngine
 {
 public:
