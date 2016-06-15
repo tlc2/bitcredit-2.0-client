@@ -136,14 +136,14 @@ public:
         nDefaultPort = 2017;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1465324448, 68, 0x2000ffff, 1, 1 * COIN);
+        genesis = CreateGenesisBlock(1465996357, 1126, 0x2000ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         //MineNewGenesisBlock();
-        assert(consensus.hashGenesisBlock == uint256S("0x00df88257fa647e814dea693d68307a080bb521a8b596f49695ad7da0deb6f58"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0068a1e893a52105e799c996d18903935100b04b9f284496818f92f0e14e25f4"));
         assert(genesis.hashMerkleRoot == uint256S("0x5e231c1d1c7d4de333694206154e7d37de5c16a791f8440fcbee0136760253a6"));
 
-        vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base server
-        //vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
+        vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base servers
+        vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,25);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,13);
@@ -161,8 +161,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (0, uint256S("0x00df88257fa647e814dea693d68307a080bb521a8b596f49695ad7da0deb6f58")),
-            1465324448, // * UNIX timestamp of last checkpoint block
+            (0, uint256S("0x0068a1e893a52105e799c996d18903935100b04b9f284496818f92f0e14e25f4")),
+            1465996357, // * UNIX timestamp of last checkpoint block
             1,   // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             1440.0     // * estimated number of transactions per day after checkpoint
@@ -207,11 +207,11 @@ public:
         nDefaultPort = 12017;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1462499277, 41, 0x2000ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1465996357, 1126, 0x2000ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-		//MineNewGenesisBlock();
-        assert(consensus.hashGenesisBlock == uint256S("0x0057d5b212cb690f0982640161e70cf49b46f776e646bfb06007adf3a737db89"));
-        assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
+        //MineNewGenesisBlock();
+        assert(consensus.hashGenesisBlock == uint256S("0x0068a1e893a52105e799c996d18903935100b04b9f284496818f92f0e14e25f4"));
+        assert(genesis.hashMerkleRoot == uint256S("0x5e231c1d1c7d4de333694206154e7d37de5c16a791f8440fcbee0136760253a6"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -278,12 +278,12 @@ public:
         nDefaultPort = 12018;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1462499277, 41, 0x2000ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1465996357, 1126, 0x2000ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-		//MineNewGenesisBlock();
+        //MineNewGenesisBlock();
         //throw std::runtime_error(strprintf("genesis hash %s", genesis.GetHash().ToString().c_str()));
-        assert(consensus.hashGenesisBlock == uint256S("0x0057d5b212cb690f0982640161e70cf49b46f776e646bfb06007adf3a737db89"));
-        assert(genesis.hashMerkleRoot == uint256S("0x296b7b241c0cc0ed25571db08839386e26551d5ef82b9576af1455f0afd1353b"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0068a1e893a52105e799c996d18903935100b04b9f284496818f92f0e14e25f4"));
+        assert(genesis.hashMerkleRoot == uint256S("0x5e231c1d1c7d4de333694206154e7d37de5c16a791f8440fcbee0136760253a6"));
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();      //!< Regtest mode doesn't have any DNS seeds.
