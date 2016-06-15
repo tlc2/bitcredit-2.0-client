@@ -27,8 +27,15 @@
 #include "utilmoneystr.h"
 #include "validationinterface.h"
 
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <iostream>
+#include <fstream>
 #include <queue>
 
 using namespace std;
@@ -81,6 +88,25 @@ string convertAddress(const char address[], char newVersionByte){
     return result;
 }
 
+
+std::map<std::string,int64_t> getGenesisBalances(){
+	std::map<std::string,int64_t> genesisBalances;
+	//Bitcredit v 1.0 Balances
+	ifstream myfile ("genesisbalances.txt");
+	char * pEnd;
+	std::string line;
+	if (myfile.is_open()){
+		while ( myfile.good() ){
+			getline (myfile,line);
+			std::vector<std::string> strs;
+			boost::split(strs, line, boost::is_any_of(","));
+			genesisBalances[strs[0]]=strtoll(strs[1].c_str(),&pEnd,10);
+		}
+		myfile.close();
+	}	
+	return genesisBalances;
+}
+
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
@@ -101,6 +127,23 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
     txNew.vout.resize(bidtracker.size()+ 2);
     txNew.vout[0].scriptPubKey = scriptPubKeyIn;
 	txNew.vout[1].scriptPubKey = DEV_SCRIPT;    
+
+    if(chainActive.Tip()->nHeight==1){
+		//Block 1 - add balances for v 1.0
+		std::map<std::string,int64_t> genesisBalances = getGenesisBalances();
+		std::map<std::string,int64_t>::iterator ballit;
+		int i=1;
+		int64_t total=0;
+		txNew.vout.resize(genesisBalances.size()+1);
+		for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
+		{
+			CBitcreditAddress address(ballit->first);
+			txNew.vout[i].scriptPubKey= GetScriptForDestination(address.Get());
+			txNew.vout[i].nValue = ballit->second;
+			total = total+ballit->second;
+			i++;
+		}
+	}
 
 	if (bidtracker.size()>0){
 		int i = 2;

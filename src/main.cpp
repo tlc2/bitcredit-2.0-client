@@ -7,6 +7,7 @@
 
 #include "addrman.h"
 #include "arith_uint256.h"
+#include "base58.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
@@ -1562,14 +1563,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
-
-    CAmount nSubsidy = 50 * COIN;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
+    CAmount nSubsidy = 5 * COIN;
     return nSubsidy;
 }
 
@@ -2734,6 +2728,155 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         SyncWithWallets(tx, pindexNew, pblock);
     }
 
+	CBlock blockr;
+	string miner;
+	CTxDestination m;
+	ExtractDestination(pblock->vtx[0].vout[0].scriptPubKey, m);
+	miner = CBitcreditAddress(m).ToString().c_str();
+
+	sqlite3 *rawdb;
+	sqlite3_stmt *stmt;
+	char *zErrMsg = 0;
+	int rc;
+
+	std::map<std::string, int64_t>::iterator addrvalit;
+	std::map<std::string, int64_t> addressvalue = getbalances();
+
+
+	sqlite3_open((GetDataDir() / "ratings/rawdata.db").string().c_str(), &rawdb);
+	sqlite3_exec(rawdb, "PRAGMA synchronous = OFF", NULL, NULL, &zErrMsg);
+	sqlite3_exec(rawdb, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
+
+	
+	BOOST_FOREACH(const CTransaction& tx, pblock->vtx){
+
+		char * insertquery = sqlite3_mprintf("insert into BLOCKS (ID, HASH, TIME, MINER) values (%lld,'%q',%lld,'%q')", pindexNew->nHeight, pblock->GetHash().ToString().c_str(), pblock->nTime, miner.c_str());
+		rc = sqlite3_exec(rawdb, insertquery, callback, 0, &zErrMsg);
+
+		for (unsigned int j = 0; j < tx.vout.size(); j++){
+			CTxDestination address;
+			ExtractDestination(tx.vout[j].scriptPubKey, address);
+			string receiveAddress = CBitcreditAddress(address).ToString().c_str();
+			int64_t theAmount = tx.vout[j].nValue;
+			addressvalue[receiveAddress] = addressvalue[receiveAddress] + theAmount;
+
+			char *sql = "select * from RAWDATA where ADDRESS = ?";
+
+			rc = sqlite3_prepare(rawdb, sql, strlen(sql), &stmt, 0);
+			sqlite3_bind_text(stmt, 1, receiveAddress.data(), receiveAddress.size(), 0);
+			if (sqlite3_step(stmt) == SQLITE_ROW){
+
+				int64_t balance, txoutcount, totalout;
+				balance = sqlite3_column_int(stmt, 1);
+				txoutcount = sqlite3_column_int(stmt, 4);
+				totalout = sqlite3_column_int(stmt, 6);
+				sqlite3_finalize(stmt);
+				if (fDebug)LogPrintf("SQlite output record retrieved %s, %lld, %lld, %lld\n", receiveAddress, balance, txoutcount, totalout);
+
+				char* updatequery = sqlite3_mprintf("update RAWDATA set BALANCE = %lld, TXOUTCOUNT =%lld, TOTALOUT= %lld where ADDRESS = '%q'", balance + theAmount, txoutcount + 1, totalout + theAmount, receiveAddress.c_str());
+				rc = sqlite3_exec(rawdb, updatequery, callback, 0, &zErrMsg);
+
+				if (rc != SQLITE_OK){
+					if (fDebug)LogPrintf("SQL update output error: %s\n", zErrMsg);
+					sqlite3_free(zErrMsg);
+				}
+				else{
+					if (fDebug)LogPrintf("update created successfully\n");
+				}
+			}
+			else{
+				char * insertquery = sqlite3_mprintf("insert into RAWDATA (ADDRESS, BALANCE, FIRSTSEEN, TXOUTCOUNT, TOTALOUT) values ('%q',%lld,%lld,%lld,%lld)", receiveAddress.c_str(), theAmount, pblock->nTime, 1, theAmount);
+				rc = sqlite3_exec(rawdb, insertquery, callback, 0, &zErrMsg);
+
+				if (rc != SQLITE_OK){
+					if (fDebug)LogPrintf("SQL insert error: %s\n", zErrMsg);
+					sqlite3_free(zErrMsg);
+				}
+				else{
+					if (fDebug)LogPrintf("insert created successfully\n");
+				}
+				sqlite3_finalize(stmt);
+			}			
+		}
+
+		for (size_t i = 0; i < tx.vin.size(); i++){
+			if (tx.IsCoinBase())
+				continue;
+			const CScript &script = tx.vin[i].scriptSig;
+			opcodetype opcode;
+			std::vector<unsigned char> vch;
+			uint256 prevoutHash, blockHash;
+			string spendAddress;
+			int64_t theAmount;
+			for (CScript::const_iterator pc = script.begin(); script.GetOp(pc, opcode, vch);){
+				if (opcode == 33){
+					CPubKey pubKey(vch);
+					prevoutHash = tx.vin[i].prevout.hash;
+					CTransaction txOfPrevOutput;
+					if (!GetTransaction(prevoutHash, txOfPrevOutput, Params().GetConsensus(), blockHash, true)){
+						if (fDebug)LogPrintf("AddrDB error Could not get transaction %s (output %d) referenced by input #%d of transaction %s in block %s\n"
+							, prevoutHash.ToString().c_str(), tx.vin[i].prevout.n, (int)i, tx.GetHash().ToString().c_str(), pblock->GetHash().ToString().c_str());
+						continue;
+					}
+					unsigned int nOut = tx.vin[i].prevout.n;
+					if (nOut >= txOfPrevOutput.vout.size()){
+						if (fDebug)LogPrintf("Output %u, not in transaction: %s\n", nOut, prevoutHash.ToString().c_str());
+						continue;
+					}
+					const CTxOut &txOut = txOfPrevOutput.vout[nOut];
+					CTxDestination addressRet;
+					if (!ExtractDestination(txOut.scriptPubKey, addressRet)){
+						if (fDebug)LogPrintf("ExtractDestination failed: %s\n", prevoutHash.ToString().c_str());
+						continue;
+					}
+					spendAddress = CBitcreditAddress(addressRet).ToString().c_str();
+					theAmount = txOut.nValue;
+					addressvalue[spendAddress] = addressvalue[spendAddress] - theAmount;
+					const char *updatequery = "select * from RAWDATA where ADDRESS = ?";
+
+					rc = sqlite3_prepare(rawdb, updatequery, strlen(updatequery), &stmt, 0);
+					sqlite3_bind_text(stmt, 1, spendAddress.data(), spendAddress.size(), 0);
+					if (sqlite3_step(stmt) == SQLITE_ROW){
+						int64_t balance, txincount, totalin;
+						balance = sqlite3_column_int(stmt, 1);
+						txincount = sqlite3_column_int(stmt, 3);
+						totalin = sqlite3_column_int(stmt, 5);
+
+						if (fDebug)LogPrintf("SQlite input record retrieved %s, %lld, %lld, %lld \n", spendAddress, balance, txincount, totalin);
+						sqlite3_finalize(stmt);
+						char *updatequery = sqlite3_mprintf("update RAWDATA set BALANCE = %lld , TXINCOUNT =%lld,  TOTALIN= %lld where ADDRESS = '%q'", balance - theAmount, txincount + 1, totalin + theAmount, spendAddress.c_str());
+						rc = sqlite3_exec(rawdb, updatequery, callback, 0, &zErrMsg);
+
+						if (rc != SQLITE_OK){
+							if (fDebug)LogPrintf("SQL update output error: %s\n", zErrMsg);
+							sqlite3_free(zErrMsg);
+						}
+						else{
+							if (fDebug)LogPrintf("update created successfully\n");
+						}
+					}
+				}
+			}
+		}
+	}
+
+	sqlite3_exec(rawdb, "END TRANSACTION", NULL, NULL, &zErrMsg);
+	if (sqlite3_close(rawdb) != SQLITE_OK){
+		if (fDebug)LogPrintf("SQL unable to close database %s\n", sqlite3_errmsg(rawdb));
+		sqlite3_free(zErrMsg);
+	}
+	else{
+		if (fDebug)LogPrintf("database closed successfully\n");
+	}
+
+	ofstream addrdb;
+	addrdb.open((GetDataDir() / "ratings/balances.dat").string().c_str(), std::ofstream::trunc);
+
+	for (addrvalit = addressvalue.begin(); addrvalit != addressvalue.end(); ++addrvalit){
+		addrdb << addrvalit->first << "," << addrvalit->second << endl;
+	}
+	addrdb.close();
+
     int64_t nTime6 = GetTimeMicros(); nTimePostConnect += nTime6 - nTime5; nTimeTotal += nTime6 - nTime1;
     LogPrint("bench", "  - Connect postprocess: %.2fms [%.2fs]\n", (nTime6 - nTime5) * 0.001, nTimePostConnect * 0.000001);
     LogPrint("bench", "- Connect block: %.2fms [%.2fs]\n", (nTime6 - nTime1) * 0.001, nTimeTotal * 0.000001);
@@ -3849,7 +3992,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
         if (nCheckLevel >= 1 && !CheckBlock(block, state))
-            return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__, 
+            return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
         if (nCheckLevel >= 2 && pindex) {
@@ -3940,7 +4083,7 @@ bool LoadBlockIndex()
     return true;
 }
 
-bool InitBlockIndex(const CChainParams& chainparams) 
+bool InitBlockIndex(const CChainParams& chainparams)
 {
     LOCK(cs_main);
 	DEV_SCRIPT << OP_DUP << OP_HASH160 << ParseHex(DEV_ADDRESS) << OP_EQUALVERIFY << OP_CHECKSIG;
@@ -4667,8 +4810,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             pfrom->PushMessage(NetMsgType::SENDHEADERS);
         }
     }
-
-
+    
     else if (strCommand == NetMsgType::ADDR)
     {
         vector<CAddress> vAddr;

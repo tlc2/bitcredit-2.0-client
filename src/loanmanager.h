@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 
+#include "util.h"
+#include "utilmoneystr.h"
+
 #include <sqlite3.h>
 #include <curl/curl.h>
 
@@ -18,9 +21,19 @@ public:
     CURLcode res;
     CURL *curl;
 	void getverifieddata();
-	void process_conn_client(int s,string d);
-	bool senddata(string data);
+	//bool senddata(string data);
 	void getcreditratings();
+    string loanreq(string address, CAmount amount, double premium, int expiry , int period, string message, string tx);
+
+    string loan(string address, string receiver , string reqtx, CAmount amount,string reqid, string message, string tx);
+
+    string reportdefault(string address, string defaulter , string reqtx, string loantx, CAmount amount,string reqid, string tx);
+
+    string registerchainid(string address, string bitcointx , string tx);
+
+    string newvote(string address, string topicstarter , string topic, string option1, string option2, string description, string tx);
+
+    string vote(string address, string topic , int option, string tx);
 	
 };
 

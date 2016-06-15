@@ -217,6 +217,13 @@ extern const char *SENDHEADERS;
  * @since protocol version 70013 as described by BIP133
  */
 extern const char *FEEFILTER;
+
+extern const char *LOANREQUEST;
+extern const char *LOAN;
+extern const char *REGISTERADDRESS;
+extern const char *REPORTDEFAULT;
+extern const char *NEWVOTE;
+extern const char *VOTE;
 };
 
 /* Get a vector of all valid message types (see above) */
