@@ -132,10 +132,12 @@ void P2PPage::SubmitLoanRequest()
         proc1->start(callnix);
         proc1->waitForFinished();
         QString output(proc1->readAllStandardOutput()); 
+        QString outputerror(proc1->readAllStandardError());
     #elif _WIN32
         proc1->start(callwin);
         proc1->waitForFinished();
-        QString output(proc1->readAllStandardOutput());      
+        QString output(proc1->readAllStandardOutput());
+        QString outputerror(proc1->readAllStandardError());      
     #endif
 
     //QMessageBox::information(0, QString("Info!"), output, QMessageBox::Ok);
@@ -147,7 +149,7 @@ void P2PPage::SubmitLoanRequest()
     }
     else
     {
-        QMessageBox::information(0, QString("Attention!"), QString("There was a problem with your loan request. Please check your entered paramaters and password and retry."), QMessageBox::Ok); 
+        QMessageBox::information(0, QString("Attention!"), QString("There was a problem with your loan request. Please check your entered paramaters and password and retry.\n\n" + outputerror), QMessageBox::Ok); 
     }
 }
 
