@@ -1837,13 +1837,13 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 {
     if (!tx.IsCoinBase())
     {
-LogPrintf(" Step 1a\n");
+
         if (!Consensus::CheckTxInputs(tx, state, inputs, GetSpendHeight(inputs)))
             return false;
-LogPrintf(" Step 2a\n");
+
         if (pvChecks)
             pvChecks->reserve(tx.vin.size());
-LogPrintf(" Step 3a\n");
+
         // The first loop above does all the inexpensive checks.
         // Only if ALL inputs pass do we perform expensive ECDSA signature checks.
         // Helps prevent CPU exhaustion attacks.
@@ -1859,7 +1859,7 @@ LogPrintf(" Step 3a\n");
                 const COutPoint &prevout = tx.vin[i].prevout;
                 const CCoins* coins = inputs.AccessCoins(prevout.hash);
                 assert(coins);
-LogPrintf(" Step 4a\n");
+
                 // Verify signature
                 CScriptCheck check(*coins, tx, i, flags, cacheStore);
                 if (pvChecks) {
@@ -1878,7 +1878,7 @@ LogPrintf(" Step 4a\n");
                         if (check2())
                             return state.Invalid(false, REJECT_NONSTANDARD, strprintf("non-mandatory-script-verify-flag (%s)", ScriptErrorString(check.GetScriptError())));
                     }
-LogPrintf(" Step 5a\n");
+LogPrintf(" Step 0a\n");
                     // Failures of other flags indicate a transaction that is
                     // invalid in new blocks, e.g. a invalid P2SH. We DoS ban
                     // such nodes as they are not following the protocol. That
@@ -1887,11 +1887,15 @@ LogPrintf(" Step 5a\n");
                     // peering with non-upgraded nodes even after a soft-fork
                     // super-majority vote has passed.
                     return state.DoS(100,false, REJECT_INVALID, strprintf("mandatory-script-verify-flag-failed (%s)", ScriptErrorString(check.GetScriptError())));
+LogPrintf(" Step 1a\n");
                 }
+LogPrintf(" Step 2a\n");
             }
+LogPrintf(" Step 3a\n");        
         }
+LogPrintf(" Step 4a\n");
     }
-
+LogPrintf(" Step 5a\n");
     return true;
 }
 
