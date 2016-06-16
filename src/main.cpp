@@ -1887,15 +1887,10 @@ LogPrintf(" Step 0a\n");
                     // peering with non-upgraded nodes even after a soft-fork
                     // super-majority vote has passed.
                     return state.DoS(100,false, REJECT_INVALID, strprintf("mandatory-script-verify-flag-failed (%s)", ScriptErrorString(check.GetScriptError())));
-LogPrintf(" Step 1a\n");
                 }
-LogPrintf(" Step 2a\n");
             }
-LogPrintf(" Step 3a\n");        
         }
-LogPrintf(" Step 4a\n");
     }
-LogPrintf(" Step 5a\n");
     return true;
 }
 
@@ -2753,7 +2748,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
 	sqlite3_exec(rawdb, "PRAGMA synchronous = OFF", NULL, NULL, &zErrMsg);
 	sqlite3_exec(rawdb, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
 
-	
+
 	BOOST_FOREACH(const CTransaction& tx, pblock->vtx){
 
 		char * insertquery = sqlite3_mprintf("insert into BLOCKS (ID, HASH, TIME, MINER) values (%lld,'%q',%lld,'%q')", pindexNew->nHeight, pblock->GetHash().ToString().c_str(), pblock->nTime, miner.c_str());
@@ -2802,7 +2797,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
 					if (fDebug)LogPrintf("insert created successfully\n");
 				}
 				sqlite3_finalize(stmt);
-			}			
+			}
 		}
 
 		for (size_t i = 0; i < tx.vin.size(); i++){
@@ -4816,7 +4811,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             pfrom->PushMessage(NetMsgType::SENDHEADERS);
         }
     }
-    
+
     else if (strCommand == NetMsgType::ADDR)
     {
         vector<CAddress> vAddr;
