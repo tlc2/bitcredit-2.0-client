@@ -59,7 +59,6 @@ static const bool DEFAULT_WALLETBROADCAST = true;
 
 extern const char * DEFAULT_WALLET_DAT;
 
-static const unsigned int MAX_TX_COMMAND_LEN = 240;
 
 class CBlockIndex;
 class CCoinControl;

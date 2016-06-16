@@ -45,18 +45,32 @@ void TrustEngine::createdb()
          "TOTALOUT          INTEGER     DEFAULT 0);");
 
   sql.push_back("CREATE TABLE BLOCKS(" \
-            "    ID INTEGER PRIMARY KEY AUTOINCREMENT," \
+            "    ID INTEGER AUTOINCREMENT," \
             "    HASH TEXT," \
             "    TIME INTEGER," \
-            "    MINER TEXT);");
+            "    MINER TEXT PRIMARY KEY);");
 
-   sql.push_back("CREATE TABLE RATINGS("  \
+   sql.push_back("CREATE TABLE CHAINIDS("  \
+         "CHAINID TEXT PRIMARY KEY      NOT NULL," \
+         "BTCHASH         TEXT     NOT NULL," \
+         "TX          TEXT     NOT NULL);");
+
+   sql.push_back("CREATE TABLE LOANREQUESTS("  \
+         "CHAINID TEXT PRIMARY KEY      NOT NULL," \
+         "AMOUNT           INTEGER     DEFAULT 0," \
+         "PREMIUM         DOUBLE     DEFAULT 0," \
+         "EXPIRY         INTEGER     DEFAULT 0," \
+         "PERIOD        INTEGER     DEFAULT 0," \
+         "TX          TEXT     NOT NULL);");
+
+   sql.push_back("CREATE TABLE LOANS("  \
          "ADDRESS TEXT PRIMARY KEY      NOT NULL," \
-         "TRUST         REAL     DEFAULT 0," \
-         "CREDITRATING        REAL     DEFAULT 0," \
-         "REGISTERED           TEXT     DEFAULT 0," \
-         "BAN        TEXT     DEFAULT 0," \
-         "LIMIT          INTEGER     DEFAULT 0);");
+         "BALANCE           INTEGER     DEFAULT 0," \
+         "FIRSTSEEN         INTEGER     DEFAULT 0," \
+         "TXINCOUNT         INTEGER     DEFAULT 0," \
+         "TXOUTCOUNT        INTEGER     DEFAULT 0," \
+         "TOTALIN           INTEGER     DEFAULT 0," \
+         "TOTALOUT          INTEGER     DEFAULT 0);");
 
    /* Execute SQL statements */
 	for (unsigned int i =0;i < sql.size();i++){

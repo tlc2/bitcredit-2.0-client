@@ -1992,7 +1992,8 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
 	wtxNew.strTxCommand = strTxCommand;
 	if (wtxNew.strTxCommand.length() > MAX_TX_COMMAND_LEN)
 		wtxNew.strTxCommand.resize(MAX_TX_COMMAND_LEN);
-           
+   /* if (wtxNew.strTxCommand.length() > 0)
+        wtxNew.nVersion = CTransaction::TXMSG_VERSION; */          
     CMutableTransaction txNew;
 
     // Discourage fee sniping.

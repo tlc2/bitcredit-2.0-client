@@ -1101,8 +1101,9 @@ public:
              SerializeOutput(s, nOutput, nType, nVersion);
         // Serialize nLockTime
         ::Serialize(s, txTo.nLockTime, nType, nVersion);
-        // Serialize strTxCommand
-        ::Serialize(s, txTo.strTxCommand, nType, nVersion); 
+        // Serialize strTxComment
+        if(txTo.nVersion >= CTransaction::MAX_STANDARD_VERSION) { 
+        ::Serialize(s, txTo.strTxCommand, nType, nVersion); }
     }
 };
 
