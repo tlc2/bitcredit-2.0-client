@@ -1249,7 +1249,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                                            hashAncestor.ToString()));
             }
         }
-LogPrintf(" Step 1\n");
+
         // Check if it's economically rational to mine this transaction rather
         // than the ones it replaces.
         CAmount nConflictingFees = 0;
@@ -1302,7 +1302,7 @@ LogPrintf(" Step 1\n");
                                   newFeeRate.ToString(),
                                   oldFeeRate.ToString()));
                 }
-LogPrintf(" Step 2\n");
+
                 BOOST_FOREACH(const CTxIn &txin, mi->GetTx().vin)
                 {
                     setConflictsParents.insert(txin.prevout.hash);
@@ -1331,7 +1331,7 @@ LogPrintf(" Step 2\n");
                             nConflictingCount,
                             maxDescendantsToVisit));
             }
-LogPrintf(" Step 3\n");
+
             for (unsigned int j = 0; j < tx.vin.size(); j++)
             {
                 // We don't want to accept replacements that require low
@@ -1350,7 +1350,7 @@ LogPrintf(" Step 3\n");
                                                   hash.ToString(), j));
                 }
             }
-LogPrintf(" Step 4\n");
+
             // The replacement must pay greater fees than the transactions it
             // replaces - if we did the bandwidth used by those conflicting
             // transactions would not be paid for.
@@ -1361,7 +1361,7 @@ LogPrintf(" Step 4\n");
                                  strprintf("rejecting replacement %s, less fees than conflicting txs; %s < %s",
                                           hash.ToString(), FormatMoney(nModifiedFees), FormatMoney(nConflictingFees)));
             }
-LogPrintf(" Step 5\n");
+
             // Finally in addition to paying more fees than the conflicts the
             // new transaction must pay for its own bandwidth.
             CAmount nDeltaFees = nModifiedFees - nConflictingFees;
@@ -1837,12 +1837,13 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 {
     if (!tx.IsCoinBase())
     {
+LogPrintf(" Step 1a\n");
         if (!Consensus::CheckTxInputs(tx, state, inputs, GetSpendHeight(inputs)))
             return false;
-
+LogPrintf(" Step 2a\n");
         if (pvChecks)
             pvChecks->reserve(tx.vin.size());
-
+LogPrintf(" Step 3a\n");
         // The first loop above does all the inexpensive checks.
         // Only if ALL inputs pass do we perform expensive ECDSA signature checks.
         // Helps prevent CPU exhaustion attacks.
@@ -1858,7 +1859,7 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
                 const COutPoint &prevout = tx.vin[i].prevout;
                 const CCoins* coins = inputs.AccessCoins(prevout.hash);
                 assert(coins);
-
+LogPrintf(" Step 4a\n");
                 // Verify signature
                 CScriptCheck check(*coins, tx, i, flags, cacheStore);
                 if (pvChecks) {
@@ -1877,6 +1878,7 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
                         if (check2())
                             return state.Invalid(false, REJECT_NONSTANDARD, strprintf("non-mandatory-script-verify-flag (%s)", ScriptErrorString(check.GetScriptError())));
                     }
+LogPrintf(" Step 5a\n");
                     // Failures of other flags indicate a transaction that is
                     // invalid in new blocks, e.g. a invalid P2SH. We DoS ban
                     // such nodes as they are not following the protocol. That
