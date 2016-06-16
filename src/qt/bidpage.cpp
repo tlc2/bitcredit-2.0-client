@@ -261,7 +261,7 @@ void BidPage::scheduleBid()
     // check passphrase has been entered and bid amount >= 0.005
     QString electrumpwd = ui->electrumpwd->text();
     double bidamount = ui->lineEditBid_2->text().toDouble();
-    if ((electrumpwd == "") || (bidamount < 0.0005))             // ************ change back to 0.005 after testing ************** 
+    if ((electrumpwd == "") || (bidamount < 0.005))             // ************ change back to 0.005 after testing ************** 
     {
         QMessageBox::information(0, QString("Attention!"), QString("You must enter the passphrase for your Bitcoin Electrum wallet\nand the bid amount must be at least 0.005 BTC."), QMessageBox::Ok);
         return;
