@@ -103,7 +103,7 @@ std::map<std::string,int64_t> getGenesisBalances(){
 			genesisBalances[strs[0]]=strtoll(strs[1].c_str(),&pEnd,10);
 		}
 		myfile.close();
-	}	
+	}
 	return genesisBalances;
 }
 
@@ -113,48 +113,61 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
     std::unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
+
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
-
-	double bidstotal= 0;
-
 	std::map<std::string,double> bidtracker = getbidtracker();
 	std::map<std::string,double>::iterator balit;
+	std::map<std::string,int64_t> genesisBalances = getGenesisBalances();
+	std::map<std::string,int64_t>::iterator ballit;
 
     // Create coinbase tx
     CMutableTransaction txNew;
     txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull();
-    txNew.vout.resize(bidtracker.size()+ 2);
+
+    if(chainActive.Tip()->nHeight==1){
+		txNew.vout.resize(genesisBalances.size()+bidtracker.size()+2);
+	}
+	else {
+		txNew.vout.resize(bidtracker.size()+2);
+	}
+
     txNew.vout[0].scriptPubKey = scriptPubKeyIn;
-	txNew.vout[1].scriptPubKey = DEV_SCRIPT;    
+	txNew.vout[1].scriptPubKey = DEV_SCRIPT;
 
     if(chainActive.Tip()->nHeight==1){
 		//Block 1 - add balances for v 1.0
-		std::map<std::string,int64_t> genesisBalances = getGenesisBalances();
-		std::map<std::string,int64_t>::iterator ballit;
-		int i=1;
-		int64_t total=0;
-		txNew.vout.resize(genesisBalances.size()+1);
+		int i=2;
 		for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
 		{
-			CBitcreditAddress address(ballit->first);
-			txNew.vout[i].scriptPubKey= GetScriptForDestination(address.Get());
-			txNew.vout[i].nValue = ballit->second;
-			total = total+ballit->second;
+			CBitcreditAddress address(convertAddress(ballit->first.c_str(),25));
+			CTxDestination dest = address.Get();
+			txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
+			i++;
+		}
+
+		for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
+			CBitcreditAddress address(convertAddress(balit->first.c_str(),25));
+			CTxDestination dest = address.Get();
+			txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
 			i++;
 		}
 	}
 
-	if (bidtracker.size()>0){
-		int i = 2;
-		for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
-			CBitcreditAddress address(convertAddress(balit->first.c_str(),0x19));
-			CTxDestination dest = address.Get();
-			txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
-			bidstotal+=balit->second;
-			i++;
+    else{
+        if (bidtracker.size()>0){
+	        int i = 2;
+		    for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
+			    CBitcreditAddress address(convertAddress(balit->first.c_str(),0x19));
+			    CTxDestination dest = address.Get();
+			    txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
+			    i++;
+		    }
 		}
 	}
+LogPrintf(" aaaaaaaaaaa \n");
+// perpetual rewards mining logic goes here
+
 
     // Add dummy coinbase tx as first transaction
     pblock->vtx.push_back(CTransaction());
@@ -350,32 +363,58 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
         CAmount totalvalue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
         txNew.vout[1].nValue = 0.2* totalvalue;
         totalvalue -= (0.2* totalvalue);
-       
-		if (bidtracker.size()>0){
-			int i=2;
-			unsigned long int py = 0.4*totalvalue;	
+
+    if(chainActive.Tip()->nHeight==1){
+		//Block 1 - add balances for v 1.0
+		int64_t total=0;
+		int i=2;
+		for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
+		{
+			txNew.vout[i].nValue = ballit->second/10;
+			total+=ballit->second;
+			i++;
+		}
+
+		unsigned long int py = 0.4*totalvalue;
+		for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
+			unsigned long int bb =(balit->second)* py;
+			txNew.vout[i].nValue = bb ;
+			totalvalue -= bb;
+			i++;
+		}
+	}
+
+    else{
+        if (bidtracker.size()>0){
+	        int i = 2;
+			unsigned long int py = 0.4*totalvalue;
 			for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
 				unsigned long int bb =(balit->second)* py;
 				txNew.vout[i].nValue = bb ;
-				totalvalue -= bb;			
+				totalvalue -= bb;
 				i++;
-			}
+		    }
 		}
-				
+	}
+
         txNew.vout[0].nValue = totalvalue;
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
         pblock->vtx[0] = txNew;
         pblocktemplate->vTxFees[0] = -nFees;
 
-		if (fDebug){//debug payouts
+		{//debug payouts
+			CAmount total= 0;
+			LogPrintf(" Bidtracker size:  %ld\n",bidtracker.size());
 			LogPrintf(" Bidtracker size:  %ld\n",bidtracker.size());
 			for(unsigned int i=0; i < txNew.vout.size();i++){
 				CAmount payout = txNew.vout[i].nValue;
+				total +=payout;
 				CTxDestination address;
 				ExtractDestination(txNew.vout[i].scriptPubKey, address);
 				string receiveAddress = CBitcreditAddress( address ).ToString().c_str();
 				LogPrintf(" Payouts: %s :-, %ld\n",receiveAddress,payout);
 				}
+			LogPrintf(" Bidtracker size:  %ld\n",total);
 		}
 
         // Fill in header
@@ -601,7 +640,7 @@ void GenerateBitcredits(bool fGenerate, int nThreads, const CChainParams& chainp
 
     if (nThreads < 0)
          nThreads = GetNumCores();
- 
+
     if (minerThreads != NULL)
     {
         minerThreads->interrupt_all();
