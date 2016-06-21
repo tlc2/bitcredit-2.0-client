@@ -3,7 +3,7 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-BUILDDIR="/home/tlc/Desktop/bcrlatest/bitcredit-2.0-client"
+BUILDDIR="/home/minato/bitcredit-2.0-client"
 EXEEXT=""
 
 # These will turn into comments if they were disabled when configuring.

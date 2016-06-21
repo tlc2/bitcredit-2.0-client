@@ -12,6 +12,7 @@
 #include "netbase.h"
 #include "rpc/server.h"
 #include "timedata.h"
+#include "util.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -65,8 +66,8 @@ UniValue createloanrequest(const UniValue& params, bool fHelp)
     EnsureWalletIsUnlocked();
     std::stringstream raw;
 	raw<<"loanrequest"<<'&'<<strAddress<<','<<amount<<','<<premium<<','<<expiry<<','<<period<<','<<message<<endl;
-	string strTxCommand = raw.str();
-    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+	
+    SendMoney(address.Get(), nAmount, true, wtx);
     string tx= wtx.GetHash().GetHex();
     string ret = loanmgr.loanreq(strAddress, amount, premium, expiry , period, message, tx);
     
@@ -100,6 +101,14 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
 
     CBitcreditAddress address(params[1].get_str());
     CAmount nAmount = AmountFromValue(params[2]);
+
+    wtx.mapValue["comment"] = params[6].get_str();
+    wtx.mapValue["to"]      = params[1].get_str();
+
+    EnsureWalletIsUnlocked();
+
+    SendMoney(address.Get(), nAmount, false, wtx);
+
     string tx= wtx.GetHash().GetHex();
 	string strAddress  = params[0].get_str();
 	string receiver  = params[1].get_str();
@@ -111,8 +120,8 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
     EnsureWalletIsUnlocked();
 	std::stringstream raw;
 	raw<<"issueloan"<<'&'<<strAddress<<','<<receiver<<','<<reqtx<<','<<amount<<','<<requestid<<','<<message<<endl;
-	string strTxCommand = raw.str();
-    SendMoney(address.Get(), nAmount, false, wtx, strTxCommand);
+
+    SendMoney(address.Get(), nAmount, false, wtx);
     string ret = loanmgr.loan(strAddress, receiver, reqtx, amount, requestid, message, tx);
 	
 	return  ret;
@@ -156,8 +165,8 @@ UniValue reportloandefault(const UniValue& params, bool fHelp)
     string requestid  = params[5].get_str();
 	std::stringstream raw;
 	raw<<"reportdefault"<<'&'<<strAddress<<','<<defaulter<<','<<reqtx<<','<<loantx<<','<<amount<<','<<requestid<<endl;
-	string strTxCommand = raw.str();
-    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+
+    SendMoney(address.Get(), nAmount, true, wtx);
     string ret = loanmgr.reportdefault(strAddress, defaulter, reqtx, loantx, amount, requestid, tx);
 
     return ret;
@@ -192,8 +201,8 @@ UniValue registeraddress(const UniValue& params, bool fHelp)
 	string bitcointx  = params[1].get_str();
 	std::stringstream raw;
 	raw<<"registeraddress"<<'&'<<strAddress<<','<<bitcointx<<','<<tx<<endl;
-	string strTxCommand = raw.str();
-    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+
+    SendMoney(address.Get(), nAmount, true, wtx);
     string ret = loanmgr.registerchainid(strAddress, bitcointx , tx);
 
     return ret;
@@ -235,8 +244,7 @@ UniValue createnewvote(const UniValue& params, bool fHelp)
 	string description  = params[5].get_str();
 	std::stringstream raw;
 	raw<<"createnewvote"<<'&'<<strAddress<<','<<topicstarter<<','<<topic<<','<<option1<<','<<option2<<','<<description<<endl;
-	string strTxCommand = raw.str();
-    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+    SendMoney(address.Get(), nAmount, true, wtx);
     string ret = loanmgr.newvote(strAddress, topicstarter, topic, option1, option2, description, tx);
 
     return ret;
@@ -276,8 +284,8 @@ UniValue vote(const UniValue& params, bool fHelp)
 	int option  = params[2].get_int();
 	std::stringstream raw;
 	raw<<"vote"<<'&'<<strAddress<<','<<topic<<','<<option<<endl;
-	string strTxCommand = raw.str();	
-    SendMoney(address.Get(), nAmount, true, wtx, strTxCommand);
+	
+    SendMoney(address.Get(), nAmount, true, wtx);
     string ret = loanmgr.vote(strAddress, topic, option, tx);
     
 	return ret;
