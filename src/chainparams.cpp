@@ -138,9 +138,9 @@ public:
 
         genesis = CreateGenesisBlock(1466608128, 0, 0x2000ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        MineNewGenesisBlock();
-        assert(consensus.hashGenesisBlock == uint256S("0x"));
-        assert(genesis.hashMerkleRoot == uint256S("0x"));
+        //MineNewGenesisBlock();
+        assert(consensus.hashGenesisBlock == uint256S("0x003c03819c0c9f6e4d57b563f40a24ae67980b087562896f1a0cab644d1a54d6"));
+        assert(genesis.hashMerkleRoot == uint256S("0xd53581d17bc29aa90eda43d328af49c4fea25de6143cee2b67aa3bbdf9ba59bb"));
 
         vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base server
         //vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
@@ -161,8 +161,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            (0, uint256S("0x00c6fb977359f332cab98f50639dda2818095636e4821c8238756286da5bdd89")),
-            1466529559, // * UNIX timestamp of last checkpoint block
+            (0, uint256S("0x003c03819c0c9f6e4d57b563f40a24ae67980b087562896f1a0cab644d1a54d6")),
+            1466608128, // * UNIX timestamp of last checkpoint block
             1,   // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             1440.0     // * estimated number of transactions per day after checkpoint
