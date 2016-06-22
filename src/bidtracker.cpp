@@ -307,8 +307,6 @@ void Bidtracker::combine()
 	std::ofstream myfile;
 	myfile.open((GetDataDir() /"bidtracker/prefinal.dat").string().c_str(),fstream::out);
 	std::ifstream myfile2((GetDataDir() /"bidtracker/btcbids.dat").string().c_str());
-	//std::ifstream myfile3((GetDataDir() /"bidtracker/btcbidsbackup.dat").string().c_str());
-
 
 	if (myfile2.is_open()){
 		std::string line;

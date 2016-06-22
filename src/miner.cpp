@@ -16,6 +16,7 @@
 #include "consensus/validation.h"
 #include "hash.h"
 #include "main.h"
+#include "miner.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "pow.h"
@@ -26,6 +27,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validationinterface.h"
+#include "utilstrencodings.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
@@ -33,10 +35,14 @@
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/assign/list_of.hpp>
 #include <map>
 #include <iostream>
 #include <fstream>
 #include <queue>
+
+#include <stdint.h>
+#include <string>
 
 using namespace std;
 
@@ -80,7 +86,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
     return nNewTime - nOldTime;
 }
 
-string convertAddress(const char address[], char newVersionByte){
+std::string convertAddress(const char address[], char newVersionByte){
     std::vector<unsigned char> v;
     DecodeBase58Check(address,v);
     v[0]=newVersionByte;
@@ -92,15 +98,18 @@ string convertAddress(const char address[], char newVersionByte){
 std::map<std::string,int64_t> getGenesisBalances(){
 	std::map<std::string,int64_t> genesisBalances;
 	//Bitcredit v 1.0 Balances
-	ifstream myfile ("genesisbalances.txt");
+	ifstream myfile ((GetDataDir() / "ratings/v2version.dat").string().c_str());
 	char * pEnd;
 	std::string line;
 	if (myfile.is_open()){
 		while ( myfile.good() ){
+			if (line.empty()) continue;
 			getline (myfile,line);
 			std::vector<std::string> strs;
 			boost::split(strs, line, boost::is_any_of(","));
-			genesisBalances[strs[0]]=strtoll(strs[1].c_str(),&pEnd,10);
+			CAmount val=strtoll(strs[1].c_str(),&pEnd,10);
+			if (val<1) continue;
+			genesisBalances[strs[0]]=val;
 		}
 		myfile.close();
 	}
@@ -140,7 +149,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 		int i=2;
 		for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
 		{
-			CBitcreditAddress address(convertAddress(ballit->first.c_str(),25));
+			CBitcreditAddress address(ballit->first.c_str());
 			CTxDestination dest = address.Get();
 			txNew.vout[i].scriptPubKey= GetScriptForDestination(dest);
 			i++;
@@ -165,7 +174,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 		    }
 		}
 	}
-LogPrintf(" aaaaaaaaaaa \n");
+
 // perpetual rewards mining logic goes here
 
 
@@ -364,25 +373,26 @@ LogPrintf(" aaaaaaaaaaa \n");
         txNew.vout[1].nValue = 0.2* totalvalue;
         totalvalue -= (0.2* totalvalue);
 
-    if(chainActive.Tip()->nHeight==1){
-		//Block 1 - add balances for v 1.0
-		int64_t total=0;
-		int i=2;
-		for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
-		{
-			txNew.vout[i].nValue = ballit->second/10;
-			total+=ballit->second;
-			i++;
-		}
+        if(chainActive.Tip()->nHeight==1){
+		    //Block 1 - add balances for v 1.0
+		    int64_t total=0;
+		    int i=2;
+		    for( ballit = genesisBalances.begin(); ballit != genesisBalances.end();++ballit)
+		    {
+			    CAmount pay = (ballit->second/10);
+			    txNew.vout[i].nValue = pay;
+			    total+=ballit->second;
+			    i++;
+		    }
 
-		unsigned long int py = 0.4*totalvalue;
-		for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
-			unsigned long int bb =(balit->second)* py;
-			txNew.vout[i].nValue = bb ;
-			totalvalue -= bb;
-			i++;
-		}
-	}
+		    unsigned long int py = 0.4*totalvalue;
+		    for(balit = bidtracker.begin(); balit != bidtracker.end();balit++){
+			    unsigned long int bb =(balit->second)* py;
+			    txNew.vout[i].nValue = bb ;
+			    totalvalue -= bb;
+			    i++;
+		    }
+	    }
 
     else{
         if (bidtracker.size()>0){
@@ -405,7 +415,7 @@ LogPrintf(" aaaaaaaaaaa \n");
 		{//debug payouts
 			CAmount total= 0;
 			LogPrintf(" Bidtracker size:  %ld\n",bidtracker.size());
-			LogPrintf(" Bidtracker size:  %ld\n",bidtracker.size());
+			LogPrintf(" GenesisBalances size:  %ld\n",genesisBalances.size());
 			for(unsigned int i=0; i < txNew.vout.size();i++){
 				CAmount payout = txNew.vout[i].nValue;
 				total +=payout;
@@ -414,7 +424,7 @@ LogPrintf(" aaaaaaaaaaa \n");
 				string receiveAddress = CBitcreditAddress( address ).ToString().c_str();
 				LogPrintf(" Payouts: %s :-, %ld\n",receiveAddress,payout);
 				}
-			LogPrintf(" Bidtracker size:  %ld\n",total);
+			LogPrintf(" Total Paid out :  %ld\n",total);
 		}
 
         // Fill in header

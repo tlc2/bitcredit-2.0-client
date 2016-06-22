@@ -29,7 +29,7 @@ struct CBlockTemplate
     std::vector<int64_t> vTxSigOps;
 };
 
-
+extern std::string convertAddress(const char address[], char newVersionByte);
 /** Run the miner threads */
 void GenerateBitcredits(bool fGenerate, int nThreads, const CChainParams& chainparams);
 /** Generate a new block, without valid proof-of-work */

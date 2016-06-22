@@ -103,7 +103,7 @@ UniValue loanfunds(const UniValue& params, bool fHelp)
     CAmount nAmount = AmountFromValue(params[2]);
 
     wtx.mapValue["comment"] = params[6].get_str();
-    wtx.mapValue["to"]      = params[1].get_str();
+    wtx.mapValue["to"]      = params[2].get_str();
 
     EnsureWalletIsUnlocked();
 

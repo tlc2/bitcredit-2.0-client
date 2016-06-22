@@ -7,6 +7,7 @@
 #include "clientversion.h"
 #include "init.h"
 #include "main.h"
+#include "miner.h"
 #include "net.h"
 #include "netbase.h"
 #include "rpc/server.h"
@@ -21,7 +22,17 @@
 
 #include <stdint.h>
 
+#include <stdint.h>
+#include <stdint.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+
 #include <boost/assign/list_of.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <univalue.h>
 
@@ -147,6 +158,80 @@ public:
     }
 };
 #endif
+
+UniValue getbids(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getbids\n"
+            "Returns an object containing information about existing real-time bids\n"
+            "This should be used for debugging/confirmation purposes only; this is a resource intensive\n"
+            "operation and may slow down wallet operation, especially on slow internet connections.\n"
+            "Warning, Result is an object with Pubkey hashes depicting originating address\n"
+            "for the corresponding receiving addresses, use \"getblocktemplate\".\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getbids", "")
+            + HelpExampleRpc("getbids", "")
+        );
+
+	Object oBids;
+	ifstream myfile ((GetDataDir()/ "bidtracker/final.dat").string().c_str());
+
+	std::string line;
+	if (myfile.is_open()){
+		int i=1;
+		while ( myfile.good() ){
+			getline (myfile,line);
+			if (line.empty()) continue;
+            std::vector<std::string> strs;
+            boost::split(strs, line, boost::is_any_of(","));
+			oBids.push_back(Pair((strs[0].c_str()),strs[1].c_str()));
+
+			i++;
+	}
+	}
+	myfile.close();
+    return oBids;
+}
+
+UniValue convertaddresses(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getbids\n"
+            "Address conversion utility .\n"
+            "\nExamples:\n"
+            + HelpExampleCli("convertaddresses", "")
+            + HelpExampleRpc("convertaddresses", "")
+        );
+
+	ifstream myfile ((GetDataDir()/ "ratings/genesisbalances.dat").string().c_str());
+	ofstream conv;
+	conv.open((GetDataDir() / "ratings/v2version.dat").string().c_str(), std::ofstream::trunc);
+	ofstream bitcoin;
+	bitcoin.open((GetDataDir() / "ratings/bitcoinversion.dat").string().c_str(), std::ofstream::trunc);
+
+	std::string line;
+	char * pEnd;
+	if (myfile.is_open()){
+		while ( myfile.good() ){
+			getline (myfile,line);
+			if (line.empty()) continue;
+            std::vector<std::string> strs;
+            boost::split(strs, line, boost::is_any_of(","));
+            CBitcreditAddress addressb(convertAddress(strs[0].c_str(),0x00));
+            CBitcreditAddress address(convertAddress(strs[0].c_str(),0x19));
+            int64_t value=strtoll(strs[1].c_str(),&pEnd,15);
+            if (value < 1) continue;
+			conv << address.ToString().c_str() << "," << value << endl;
+			bitcoin << addressb.ToString().c_str() << "," << value << endl;
+		}
+	}
+	myfile.close();
+	conv.close();
+	bitcoin.close();
+    return "done";
+}
 
 UniValue validateaddress(const UniValue& params, bool fHelp)
 {
@@ -448,6 +533,8 @@ static const CRPCCommand commands[] =
     { "util",               "createmultisig",         &createmultisig,         true  },
     { "util",               "verifymessage",          &verifymessage,          true  },
     { "util",               "signmessagewithprivkey", &signmessagewithprivkey, true  },
+    { "util",               "convertaddresses",       &convertaddresses,       true  },
+    { "util",               "getbids",                &getbids,                true  },
 
     /* Not shown in help */
     { "hidden",             "setmocktime",            &setmocktime,            true  },
