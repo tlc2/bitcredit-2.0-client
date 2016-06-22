@@ -527,7 +527,7 @@ void static BitcreditMiner(const CChainParams& chainparams)
 {
     LogPrintf("BitcreditMiner started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("bitcoin-miner");
+    RenameThread("bitcredit-miner");
 
     unsigned int nExtraNonce = 0;
 
