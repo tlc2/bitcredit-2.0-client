@@ -136,14 +136,14 @@ public:
         nDefaultPort = 2017;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1466529559, 685, 0x2000ffff, 1, 1 * COIN);
+        genesis = CreateGenesisBlock(1466608128, 0, 0x2000ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //MineNewGenesisBlock();
-        assert(consensus.hashGenesisBlock == uint256S("0x00c6fb977359f332cab98f50639dda2818095636e4821c8238756286da5bdd89"));
-        assert(genesis.hashMerkleRoot == uint256S("0xd53581d17bc29aa90eda43d328af49c4fea25de6143cee2b67aa3bbdf9ba59bb"));
+        MineNewGenesisBlock();
+        assert(consensus.hashGenesisBlock == uint256S("0x"));
+        assert(genesis.hashMerkleRoot == uint256S("0x"));
 
         vSeeds.push_back(CDNSSeedData("167.160.36.52", "167.160.36.52")); // base server
-        vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
+        //vSeeds.push_back(CDNSSeedData("192.52.166.220", "192.52.166.220"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,25);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,13);

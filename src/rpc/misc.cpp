@@ -174,7 +174,7 @@ UniValue getbids(const UniValue& params, bool fHelp)
             + HelpExampleRpc("getbids", "")
         );
 
-	Object oBids;
+	UniValue obj(UniValue::VOBJ);
 	ifstream myfile ((GetDataDir()/ "bidtracker/final.dat").string().c_str());
 
 	std::string line;
@@ -185,13 +185,13 @@ UniValue getbids(const UniValue& params, bool fHelp)
 			if (line.empty()) continue;
             std::vector<std::string> strs;
             boost::split(strs, line, boost::is_any_of(","));
-			oBids.push_back(Pair((strs[0].c_str()),strs[1].c_str()));
+			obj.push_back(Pair((strs[0].c_str()),strs[1].c_str()));
 
 			i++;
 	}
 	}
 	myfile.close();
-    return oBids;
+    return obj;
 }
 
 UniValue convertaddresses(const UniValue& params, bool fHelp)
@@ -205,9 +205,9 @@ UniValue convertaddresses(const UniValue& params, bool fHelp)
             + HelpExampleRpc("convertaddresses", "")
         );
 
-	ifstream myfile ((GetDataDir()/ "ratings/genesisbalances.dat").string().c_str());
+	ifstream myfile ((GetDataDir()/ "ratings/v1balances.dat").string().c_str());
 	ofstream conv;
-	conv.open((GetDataDir() / "ratings/v2version.dat").string().c_str(), std::ofstream::trunc);
+	conv.open((GetDataDir() / "ratings/genesisbalances.dat").string().c_str(), std::ofstream::trunc);
 	ofstream bitcoin;
 	bitcoin.open((GetDataDir() / "ratings/bitcoinversion.dat").string().c_str(), std::ofstream::trunc);
 
@@ -221,7 +221,7 @@ UniValue convertaddresses(const UniValue& params, bool fHelp)
             boost::split(strs, line, boost::is_any_of(","));
             CBitcreditAddress addressb(convertAddress(strs[0].c_str(),0x00));
             CBitcreditAddress address(convertAddress(strs[0].c_str(),0x19));
-            int64_t value=strtoll(strs[1].c_str(),&pEnd,15);
+            CAmount value=strtoll(strs[1].c_str(),&pEnd,10);
             if (value < 1) continue;
 			conv << address.ToString().c_str() << "," << value << endl;
 			bitcoin << addressb.ToString().c_str() << "," << value << endl;

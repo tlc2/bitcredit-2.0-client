@@ -94,11 +94,10 @@ std::string convertAddress(const char address[], char newVersionByte){
     return result;
 }
 
-
 std::map<std::string,int64_t> getGenesisBalances(){
 	std::map<std::string,int64_t> genesisBalances;
 	//Bitcredit v 1.0 Balances
-	ifstream myfile ((GetDataDir() / "ratings/v2version.dat").string().c_str());
+	ifstream myfile ((GetDataDir() / "ratings/genesisbalances.dat").string().c_str());
 	char * pEnd;
 	std::string line;
 	if (myfile.is_open()){
