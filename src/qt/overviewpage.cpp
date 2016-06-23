@@ -266,6 +266,7 @@ void OverviewPage::setClientModel(ClientModel *model)
 void OverviewPage::someFunctionThatChangesText(const QString& newtext)
 {
     Q_EMIT textChanged(newtext);
+    Q_EMIT split();
 }
 
 void OverviewPage::setWalletModel(WalletModel *model)

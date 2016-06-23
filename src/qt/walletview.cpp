@@ -116,6 +116,7 @@ void WalletView::setBitcreditGUI(BitcreditGUI *gui)
     {
         // keep header balance uipdated
         connect(overviewPage, SIGNAL(textChanged(QString)), gui->labelHeaderBalance, SLOT(setText(QString)));
+        connect(overviewPage, SIGNAL(split()), gui, SLOT(splitBalance()));
         
         // connect signals from menu page to bitcreditgui slots to switch pages
         connect(overviewPage, SIGNAL(btxclicked()), gui, SLOT(gotoHistoryPage()));

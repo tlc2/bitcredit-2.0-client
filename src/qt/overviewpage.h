@@ -50,6 +50,7 @@ Q_SIGNALS:
     void bassetsclicked();
     void butilitiesclicked();
     void textChanged(QString);
+    void split();
 
 private:
     Ui::OverviewPage *ui;

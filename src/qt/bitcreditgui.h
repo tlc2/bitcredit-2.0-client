@@ -19,6 +19,8 @@
 #include <QMenu>
 #include <QPoint>
 #include <QSystemTrayIcon>
+//#include <QHBoxLayout>
+//#include <QVBoxLayout>
 
 class ClientModel;
 class NetworkStyle;
@@ -93,6 +95,7 @@ private:
     QPushButton *bover;
     QFrame *bframe;
     QLabel *labelBalance;
+    QLabel *labelSplit;
 
     QWidget *sendrec;
     QPushButton *bsendtab;
@@ -235,7 +238,9 @@ private Q_SLOTS:
     void emitusedsending();
     void emitusedreceiving();
     void enc();
-    void changepw(); 
+    void changepw();
+
+    void splitBalance(); 
     
     
 

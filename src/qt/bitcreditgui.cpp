@@ -200,20 +200,31 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
 
     // available balance label
     labelBalance = new QLabel(bframe);
-    labelBalance->move(10, 25);
+    labelBalance->move(10, 20);
     labelBalance->setFixedWidth(520);
-    labelBalance->setFixedHeight(20);
+    labelBalance->setFixedHeight(30);
     labelBalance->setText("Available Balance:");
     labelBalance->setObjectName("labelBalance");    
 
-    // balance label  
+    // balance label - semi retired
     labelHeaderBalance = new QLabel(bframe);
-    labelHeaderBalance->move(10, 45);
-    labelHeaderBalance->setFixedWidth(520);
-    labelHeaderBalance->setFixedHeight(30);
+    labelHeaderBalance->move(1, 1);
+    labelHeaderBalance->setFixedWidth(1);
+    labelHeaderBalance->setFixedHeight(1);
     labelHeaderBalance->setText("0.00");
     labelHeaderBalance->setObjectName("labelHeaderBalance");
-    
+
+    // fancy new html label with smaller post-decimal-point digits
+    labelSplit = new QLabel(bframe);
+    labelSplit->move (10, 50);
+    labelSplit->setFixedWidth(520);
+    labelSplit->setFixedHeight(30);
+    labelSplit->sizeHint();
+    labelSplit->setAlignment(Qt::AlignCenter);
+    labelSplit->setText("0.00000000");
+    labelSplit->setObjectName("labelSplit");
+    labelSplit->setToolTip("Available Balance");   
+
     // Create actions for the toolbar, menu bar and tray/dock icon
     // Needs walletFrame to be initialized
     createActions();
@@ -465,6 +476,18 @@ void BitcreditGUI::createActions()
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_C), this, SLOT(showDebugWindowActivateConsole()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D), this, SLOT(showDebugWindow()));
+}
+
+
+void BitcreditGUI::splitBalance()
+{
+    QStringList chunks = this->labelHeaderBalance->text().split(".");
+    QString integer = chunks.at(0);
+    QString decimal = chunks.at(1);
+    //this->labelInteger->setText(integer + ".");
+    //this->labelDecimal->setText(decimal);
+    QString joined = ("<span style='font-size:18pt; font-weight:600; color:#ffffff;'>" + integer + ".</span><span style='font-size:12pt; font-weight:600; color:#ffffff;'>" + decimal + "</span>");
+    this->labelSplit->setText(joined);
 }
 
 void BitcreditGUI::enc()
