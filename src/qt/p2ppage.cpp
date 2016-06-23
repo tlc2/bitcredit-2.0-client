@@ -118,8 +118,8 @@ void P2PPage::SubmitLoanRequest()
     QString rpccallnix = ("createloanrequest " + address + " " + amount + " " + premium2 + " " + expiry2 + " " + period2 + " " + "\"" + message + "\"");
     QString rpccallwin = ("createloanrequest " + address + " " + amount + " " + premium2 + " " + expiry2 + " " + period2 + " " + "\"" + message + "\"");
 
-    //QString summary = ("Loan address: " + address + "\nAmount: " + amount + "\nPremium: " + premium + "\nExpiry: " + expiry + "\nPeriod: " + period + "\nMessage: " + message + "\n\nRPC call:\n\n" + rpccallnix);
-    //QMessageBox::information(0, QString("Test UI input parsing..."), summary, QMessageBox::Ok);
+    QString summary = ("Loan address: " + address + "\nAmount: " + amount + "\nPremium: " + premium + "\nExpiry: " + expiry + "\nPeriod: " + period + "\nMessage: " + message + "\n\nRPC call:\n\n" + rpccallnix);
+    QMessageBox::information(0, QString("Test UI input parsing..."), summary, QMessageBox::Ok);
 
     // complete RPC call with cwd
     QString callnix = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix;
@@ -140,10 +140,10 @@ void P2PPage::SubmitLoanRequest()
         QString outputerror(proc1->readAllStandardError());      
     #endif
 
-    //QMessageBox::information(0, QString("Info!"), output, QMessageBox::Ok);
+    QMessageBox::information(0, QString("Info!"), output, QMessageBox::Ok);
 
     // provide feedback on result
-    if (output.contains("true")) 
+    if (output.contains("Sent")) 
     {
         QMessageBox::information(0, QString("Request submitted!"), QString("Thank you, your loan request has been submitted and the 100 BCR fee deducted from your balance."), QMessageBox::Ok); 
     }
