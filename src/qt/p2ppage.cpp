@@ -118,8 +118,8 @@ void P2PPage::SubmitLoanRequest()
     QString rpccallnix = ("createloanrequest " + address + " " + amount + " " + premium2 + " " + expiry2 + " " + period2 + " " + "\"" + message + "\"");
     QString rpccallwin = ("createloanrequest " + address + " " + amount + " " + premium2 + " " + expiry2 + " " + period2 + " " + "\"" + message + "\"");
 
-    QString summary = ("Loan address: " + address + "\nAmount: " + amount + "\nPremium: " + premium + "\nExpiry: " + expiry + "\nPeriod: " + period + "\nMessage: " + message + "\n\nRPC call:\n\n" + rpccallnix);
-    QMessageBox::information(0, QString("Test UI input parsing..."), summary, QMessageBox::Ok);
+    //QString summary = ("Loan address: " + address + "\nAmount: " + amount + "\nPremium: " + premium + "\nExpiry: " + expiry + "\nPeriod: " + period + "\nMessage: " + message + "\n\nRPC call:\n\n" + rpccallnix);
+    //QMessageBox::information(0, QString("Test UI input parsing..."), summary, QMessageBox::Ok);
 
     // complete RPC call with cwd
     QString callnix = cwd + "/bitcredit-cli --datadir=" + cwd + " " + rpccallnix;
