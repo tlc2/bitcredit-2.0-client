@@ -101,17 +101,16 @@ std::map<std::string,int64_t> getGenesisBalances(){
 	char * pEnd;
 	std::string line;
 	if (myfile.is_open()){
-		while ( myfile.good() ){
-			if (line.empty()) continue;
+		LogPrintf(" Opened Genesis balances file  \n");
+		while ( myfile.good() ){			
 			getline (myfile,line);
 			std::vector<std::string> strs;
 			boost::split(strs, line, boost::is_any_of(","));
-			CAmount val=strtoll(strs[1].c_str(),&pEnd,10);
-			if (val<1) continue;
-			genesisBalances[strs[0]]=val;
+			genesisBalances[strs[0]]=strtoll(strs[1].c_str(),&pEnd,10);
 		}
 		myfile.close();
 	}
+	LogPrintf(" Genesis balances file parsed  \n");
 	return genesisBalances;
 }
 
@@ -173,7 +172,6 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 		    }
 		}
 	}
-
 // perpetual rewards mining logic goes here
 
 

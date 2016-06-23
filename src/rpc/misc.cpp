@@ -222,9 +222,10 @@ UniValue convertaddresses(const UniValue& params, bool fHelp)
             CBitcreditAddress addressb(convertAddress(strs[0].c_str(),0x00));
             CBitcreditAddress address(convertAddress(strs[0].c_str(),0x19));
             CAmount value=strtoll(strs[1].c_str(),&pEnd,10);
-            if (value < 1) continue;
-			conv << address.ToString().c_str() << "," << value << endl;
-			bitcoin << addressb.ToString().c_str() << "," << value << endl;
+            if (value > 1000000000000) {
+				conv << address.ToString().c_str() << "," << value << endl;
+				bitcoin << addressb.ToString().c_str() << "," << value << endl;
+			}
 		}
 	}
 	myfile.close();
