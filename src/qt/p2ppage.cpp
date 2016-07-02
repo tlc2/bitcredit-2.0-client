@@ -15,7 +15,6 @@ P2PPage::P2PPage(QWidget *parent)
     : QWidget(parent), ui(new Ui::P2PPage)
 {
     ui->setupUi(this);
-
     connect(ui->bSubmit, SIGNAL(clicked()), this, SLOT(SubmitLoanRequest()));
 }
 
