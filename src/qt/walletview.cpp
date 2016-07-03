@@ -127,7 +127,7 @@ void WalletView::setBitcreditGUI(BitcreditGUI *gui)
         connect(overviewPage, SIGNAL(bborrowclicked()), gui, SLOT(gotoP2PPage()));
         connect(overviewPage, SIGNAL(blendclicked()), gui, SLOT(gotoP2PLPage()));
         connect(overviewPage, SIGNAL(bassetsclicked()), gui, SLOT(gotoAssetsPage()));
-        connect(overviewPage, SIGNAL(butilitiesclicked()), gui, SLOT(gotoUtilitiesPage()));
+        connect(overviewPage, SIGNAL(butilitiesclicked()), gui, SLOT(gotoOtherPage()));
         
         // connect signals from otherpage to bitcreditgui slots to call menu actions
         connect(otherPage, SIGNAL(bURIclicked()), gui, SLOT(openClicked()));

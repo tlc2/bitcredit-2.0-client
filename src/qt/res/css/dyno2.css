@@ -514,15 +514,15 @@ Qcombobox QListItem
 QComboBox
 {
 padding: 0px 0px 0px 0px;
-background-color: #ffffff;
-selection-background-color: #ffffff;
+background-color: #888888;
+selection-background-color: #888888;
 color: #232323;
 }
 
 QComboBox QAbstractItemView
 {
 selection-background-color: #888888;
-background-color: #ffffff;
+background-color: #888888;
 color: #232323;
 }
 
@@ -549,7 +549,7 @@ image: url(':css/down_arrow');
 QScrollBar:vertical 
 {
 border: 1px solid #36b452;
-background: #232323;
+background: #ffffff;
 width: 15px;
 margin: 22px 0 22px 0;
 }

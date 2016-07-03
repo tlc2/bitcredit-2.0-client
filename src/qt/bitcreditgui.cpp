@@ -185,7 +185,7 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
 
     // logo - we'll make it a button that leads back to the overviewpage menu
     Logo = new QPushButton(this);
-    Logo->move(10, 30);
+    Logo->move(10, 20);
     Logo->setFixedWidth(250);
     Logo->setFixedHeight(80);
     Logo->setObjectName("Logo");
@@ -193,8 +193,8 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
 
     // balance frame
     bframe = new QFrame(this);
-    bframe->move(250, 30);
-    bframe->setFixedWidth(590);
+    bframe->move(240, 20);
+    bframe->setFixedWidth(600);
     bframe->setFixedHeight(80);
     bframe->setObjectName("bframe");    
 
@@ -217,7 +217,7 @@ BitcreditGUI::BitcreditGUI(const PlatformStyle *platformStyle, const NetworkStyl
     // fancy new html label with smaller post-decimal-point digits
     labelSplit = new QLabel(bframe);
     labelSplit->move (10, 25);
-    labelSplit->setFixedWidth(520);
+    labelSplit->setFixedWidth(530);
     labelSplit->setFixedHeight(30);
     labelSplit->sizeHint();
     labelSplit->setAlignment(Qt::AlignCenter);
@@ -484,7 +484,7 @@ void BitcreditGUI::splitBalance()
     QStringList chunks = this->labelHeaderBalance->text().split(".");
     QString integer = chunks.at(0);
     QString decimal = chunks.at(1);
-    QString joined = ("<span style='font-size:16pt; color:#232323;'>Available Balance: " + integer + "</span><span style='font-size:12pt; color:#232323;'>." + decimal + "</span>");
+    QString joined = ("<span style='font-size:12pt; color:#232323;'>Available Balance: <span style='font-size:16pt; color:#232323;'>" + integer + "</span><span style='font-size:12pt; color:#232323;'>." + decimal + "</span>");
     this->labelSplit->setText(joined);
 }
 
@@ -634,7 +634,7 @@ void BitcreditGUI::createToolBars()
         bbcrstatstab = new QPushButton(uands);
         bbcrstatstab->setFixedHeight(25);
         bbcrstatstab->setFixedWidth(207);
-        bbcrstatstab->move(0,0);
+        bbcrstatstab->move(624,0);
         bbcrstatstab->setText("BCR Network Stats");
         bbcrstatstab->setObjectName("bbcrstatstab");
         bbcrstatstab->setCheckable(true);
@@ -664,8 +664,8 @@ void BitcreditGUI::createToolBars()
         bothertab = new QPushButton(uands);
         bothertab->setFixedHeight(25);
         bothertab->setFixedWidth(206);
-        bothertab->move(624, 0);
-        bothertab->setText("Other Stuff");
+        bothertab->move(0, 0);
+        bothertab->setText("Wallet Utilities");
         bothertab->setObjectName("bothertab");
         bothertab->setCheckable(true);
         bothertab->setObjectName("bothertab");
